@@ -1,0 +1,14 @@
+@import 'slick-carousel/slick/slick.css';
+@import 'slick-carousel/slick/slick-theme.css';
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+body {
+    margin: 0;
+    box-sizing: border-box;
+    padding: 0;
+    font-family: 'IBM Plex Sans';
+}
+
+html {
+    font-size: 62.5%;
+}
