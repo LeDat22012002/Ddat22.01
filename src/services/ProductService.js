@@ -186,6 +186,59 @@ export const getAllBrand = async () => {
     return res.data;
 };
 
+// Search products với nhiều tiêu chí
+export const searchProducts = async (searchParams) => {
+    try {
+        let url = `${process.env.REACT_APP_API_URL}/product/search`;
+        
+        // Xây dựng query params
+        const params = new URLSearchParams();
+
+        // Thêm categories nếu có
+        if (searchParams?.categories?.length) {
+            params.append('categories', searchParams.categories.join(','));
+        }
+
+        // Thêm brands nếu có
+        if (searchParams?.brands?.length) {
+            params.append('brands', searchParams.brands.join(','));
+        }
+
+        // Thêm limit và page nếu có
+        if (searchParams?.limit) {
+            params.append('limit', searchParams.limit);
+        }
+        if (searchParams?.page !== undefined) {
+            params.append('page', searchParams.page);
+        }
+
+        // Thêm sort nếu có
+        if (searchParams?.sort) {
+            params.append('sort', searchParams.sort);
+        }
+
+        // Gọi API với params đã xây dựng
+        const res = await axios.get(url, { params });
+        return res.data;
+    } catch (error) {
+        console.error('Error searching products:', error);
+        throw error;
+    }
+};
+
+// Cách sử dụng:
+/*
+const searchParams = {
+    categories: ['672491ce91e1687bc82d9f71', '672491d491e1687bc82d9f74'],
+    brands: ['672430dad99c1742d137bc18', '67243335bc460e4ce82a0f65'],
+    page: 0,
+    limit: 10,
+    sort: 'newest'
+};
+
+const result = await searchProducts(searchParams);
+*/
+
 // export default {
 //     getAllCategory,
 //     getAllProduct,

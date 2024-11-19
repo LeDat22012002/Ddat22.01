@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Checkbox, Rate } from 'antd';
+import { Checkbox } from 'antd';
 import {
     LableContent,
     LableText,
-    // LableTextPrice,
     LableTextValue,
 } from './style';
 import {
     getAllBrand,
     getAllCategory,
-    getProductByBrandId,
-    getProductByCategoryId,
+    searchProducts
 } from '../../services/ProductService';
 
 const NavbarComponet = ({ onFilterChange }) => {
     const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategories, setSelectedCategories] = useState([]);
     const [brands, setBrands] = useState([]);
-    const [selectedBrand, setSelectedBrand] = useState(null);
+    const [selectedBrands, setSelectedBrands] = useState([]);
 
+    // Fetch categories
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -33,6 +32,7 @@ const NavbarComponet = ({ onFilterChange }) => {
         fetchCategories();
     }, []);
 
+    // Fetch brands
     useEffect(() => {
         const fetchBrands = async () => {
             try {
@@ -47,63 +47,60 @@ const NavbarComponet = ({ onFilterChange }) => {
         fetchBrands();
     }, []);
 
-    const handleCategoryChange = async (categoryId) => {
-        setSelectedCategory(categoryId);
+    // Search products whenever filters change
+    useEffect(() => {
+        handleSearch();
+    }, [selectedCategories, selectedBrands]);
+
+    const handleSearch = async () => {
         try {
-            if (categoryId) {
-                const response = await getProductByCategoryId(categoryId);
-                if (response?.status === 'OK') {
-                    onFilterChange(response.data);
-                }
-            } else {
-                // Khi chọn "Tất cả sản phẩm"
+            // Nếu không có filter nào được chọn
+            if (selectedCategories.length === 0 && selectedBrands.length === 0) {
                 onFilterChange(null);
+                return;
+            }
+
+            // Tạo params cho search
+            const searchParams = {
+                categories: selectedCategories,
+                brands: selectedBrands,
+                page: 0,
+                limit: 100
+            };
+
+            const response = await searchProducts(searchParams);
+            if (response?.status === 'OK') {
+                onFilterChange(response.data);
             }
         } catch (error) {
-            console.error('Error filtering products:', error);
+            console.error('Error searching products:', error);
         }
     };
 
-    const handleBrandChange = async (brandId) => {
-        setSelectedBrand(brandId);
-
-        try {
-            if (brandId) {
-                const response = await getProductByBrandId(brandId);
-                if (response?.status === 'OK') {
-                    onFilterChange(response.data);
-                }
+    const handleCategoryChange = (categoryId, checked) => {
+        setSelectedCategories(prev => {
+            if (checked) {
+                return [...prev, categoryId];
             } else {
-                // Khi chọn "Tất cả sản phẩm"
-                onFilterChange(null);
+                return prev.filter(id => id !== categoryId);
             }
-        } catch (error) {
-            console.error('Error filtering products:', error);
-        }
+        });
     };
 
-    //
-    const handleChangeAll = async (brandId, categoryId) => {
-        setSelectedBrand(brandId);
-        setSelectedCategory(categoryId);
-        try {
-            if (brandId) {
-                const response = await getProductByBrandId(brandId);
-                if (response?.status === 'OK') {
-                    onFilterChange(response.data);
-                }
-            } else if (categoryId) {
-                const response = await getProductByCategoryId(categoryId);
-                if (response?.status === 'OK') {
-                    onFilterChange(response.data);
-                }
+    const handleBrandChange = (brandId, checked) => {
+        setSelectedBrands(prev => {
+            if (checked) {
+                return [...prev, brandId];
             } else {
-                // Khi chọn "Tất cả sản phẩm"
-                onFilterChange(null);
+                return prev.filter(id => id !== brandId);
             }
-        } catch (error) {
-            console.error('Error filtering products:', error);
-        }
+        });
+    };
+
+    const handleShowAll = () => {
+        setSelectedCategories([]);
+        setSelectedBrands([]);
+        onFilterChange(null);
     };
 
     return (
@@ -113,16 +110,13 @@ const NavbarComponet = ({ onFilterChange }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <LableTextValue
                         style={{
-                            backgroundColor: !selectedCategory ? '#1890ff' : '#fff',
-                            color: !selectedCategory ? '#fff' : '#000',
+                            backgroundColor: selectedCategories.length === 0 && selectedBrands.length === 0 ? '#1890ff' : '#fff',
+                            color: selectedCategories.length === 0 && selectedBrands.length === 0 ? '#fff' : '#000',
                             cursor: 'pointer',
                             padding: '8px',
                             borderRadius: '4px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '12px',
                         }}
-                        onClick={() => handleChangeAll(null)}
+                        onClick={handleShowAll}
                     >
                         Tất cả sản phẩm
                     </LableTextValue>
@@ -130,37 +124,26 @@ const NavbarComponet = ({ onFilterChange }) => {
                         <Checkbox
                             style={{ marginLeft: 0 }}
                             key={category._id}
-                            checked={selectedCategory === category._id}
-                            onChange={() => handleCategoryChange(category._id)}
+                            checked={selectedCategories.includes(category._id)}
+                            onChange={(e) => handleCategoryChange(category._id, e.target.checked)}
                         >
-                            {category.name}
+                            {category.name} ({category.productCount})
                         </Checkbox>
                     ))}
                 </div>
             </LableContent>
+            
             <LableText>Thương hiệu</LableText>
             <LableContent>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {/* <LableTextValue
-                        style={{
-                            backgroundColor: !selectedBrand ? '#1890ff' : '#fff',
-                            color: !selectedBrand ? '#fff' : '#000',
-                            cursor: 'pointer',
-                            padding: '8px',
-                            borderRadius: '4px',
-                        }}
-                        onClick={() => handleChangeAll(null)}
-                    >
-                        Tất cả sản phẩm
-                    </LableTextValue> */}
                     {brands.map((brand) => (
                         <Checkbox
                             style={{ marginLeft: 0 }}
                             key={brand._id}
-                            checked={selectedBrand === brand._id}
-                            onChange={() => handleBrandChange(brand._id)}
+                            checked={selectedBrands.includes(brand._id)}
+                            onChange={(e) => handleBrandChange(brand._id, e.target.checked)}
                         >
-                            {brand.name}
+                            {brand.name} ({brand.productCount})
                         </Checkbox>
                     ))}
                 </div>

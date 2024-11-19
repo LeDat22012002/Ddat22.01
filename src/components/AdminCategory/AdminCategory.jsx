@@ -151,11 +151,44 @@ const AdminCategory = () => {
             dataIndex: 'name',
             sorter: (a, b) => a.name.length - b.name.length,
         },
-
+        {
+            title: 'Số lượng sản phẩm',
+            dataIndex: 'productCount',
+            render: (count) => (
+                <span style={{ 
+                    color: count > 0 ? '#389e0d' : '#595959',
+                    fontWeight: count > 0 ? 'bold' : 'normal'
+                }}>
+                    {count || 0}
+                </span>
+            ),
+        },
         {
             title: 'Action',
             dataIndex: 'action',
-            render: renderActions,
+            render: (_, record) => (
+                <div>
+                    <DeleteOutlined
+                        style={{ 
+                            color: record.productCount > 0 ? '#d9d9d9' : 'red', 
+                            fontSize: '25px', 
+                            cursor: record.productCount > 0 ? 'not-allowed' : 'pointer',
+                            marginRight: '10px'
+                        }}
+                        onClick={() => {
+                            setRowSelected(record._id);
+                            setIsModalOpenDelete(true);
+                        }}
+                    />
+                    <EditOutlined
+                        style={{ color: '#000', fontSize: '25px', cursor: 'pointer' }}
+                        onClick={() => {
+                            setRowSelected(record._id);
+                            handleDetailsCategory();
+                        }}
+                    />
+                </div>
+            ),
         },
     ];
     const dataTable =
@@ -185,13 +218,14 @@ const AdminCategory = () => {
     // }, [isSuccessDeletedMany]);
 
     useEffect(() => {
-        if (isSuccessDeleted && dataDeleted?.status === 'OK') {
-            message.success();
+        if (dataDeleted?.status === 'OK') {
+            message.success(dataDeleted?.message);
             handleCancelDelete();
-        } else if (isErrorDeleted) {
-            message.error();
+            queryCategory.refetch();
+        } else if (dataDeleted?.status === 'ERR') {
+            message.error(dataDeleted?.message);
         }
-    }, [isSuccessDeleted]);
+    }, [dataDeleted]);
     const handleCloseDrawer = () => {
         setIsOpenDrawer(false);
         setStateCategoryDetails({
@@ -211,9 +245,17 @@ const AdminCategory = () => {
 
     const handleCancelDelete = () => {
         setIsModalOpenDelete(false);
+        if (dataDeleted?.status === 'ERR') {
+            mutationDeleted.reset(); // Reset trạng thái mutation
+        }
     };
 
     const handleDeleteCategory = () => {
+        const selectedCategory = dataTable?.find(item => item._id === rowSelected);
+        if (selectedCategory?.productCount > 0) {
+            return;
+        }
+
         mutationDeleted.mutate(
             { id: rowSelected, token: user?.access_token },
             {
@@ -315,7 +357,7 @@ const AdminCategory = () => {
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Vui lòng nhập tên danh mục!',
+                                    message: 'Vui lòng nhp tên danh mục!',
                                 },
                             ]}
                         >
@@ -394,7 +436,33 @@ const AdminCategory = () => {
                 onOk={handleDeleteCategory}
             >
                 <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa danh mục này không ? </div>
+                    <div style={{ padding: '20px 0' }}>
+                        {(() => {
+                            const selectedCategory = dataTable?.find(item => item._id === rowSelected);
+                            if (!selectedCategory) return null;
+
+                            if (selectedCategory.productCount > 0) {
+                                return (
+                                    <div style={{ 
+                                        color: 'red',
+                                        fontSize: '16px',
+                                        textAlign: 'center'
+                                    }}>
+                                        Không thể xóa danh mục "{selectedCategory.name}" vì đang có {selectedCategory.productCount} sản phẩm!
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div style={{ 
+                                    fontSize: '16px',
+                                    textAlign: 'center'
+                                }}>
+                                    <span>Bạn có chắc chắn muốn xóa danh mục "{selectedCategory.name}" không?</span>
+                                </div>
+                            );
+                        })()}
+                    </div>
                 </Loading>
             </ModalComponet>
         </div>

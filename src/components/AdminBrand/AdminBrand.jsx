@@ -152,11 +152,44 @@ const AdminBrand = () => {
             dataIndex: 'name',
             sorter: (a, b) => a.name.length - b.name.length,
         },
-
+        {
+            title: 'Số lượng sản phẩm',
+            dataIndex: 'productCount',
+            render: (count) => (
+                <span style={{ 
+                    color: count > 0 ? '#389e0d' : '#595959',
+                    fontWeight: count > 0 ? 'bold' : 'normal'
+                }}>
+                    {count || 0}
+                </span>
+            ),
+        },
         {
             title: 'Action',
             dataIndex: 'action',
-            render: renderActions,
+            render: (_, record) => (
+                <div>
+                    <DeleteOutlined
+                        style={{ 
+                            color: record.productCount > 0 ? '#d9d9d9' : 'red', 
+                            fontSize: '25px', 
+                            cursor: record.productCount > 0 ? 'not-allowed' : 'pointer',
+                            marginRight: '10px'
+                        }}
+                        onClick={() => {
+                            setRowSelected(record._id);
+                            setIsModalOpenDelete(true);
+                        }}
+                    />
+                    <EditOutlined
+                        style={{ color: '#000', fontSize: '25px', cursor: 'pointer' }}
+                        onClick={() => {
+                            setRowSelected(record._id);
+                            handleDetailsBrand();
+                        }}
+                    />
+                </div>
+            ),
         },
     ];
     const dataTable =
@@ -186,13 +219,14 @@ const AdminBrand = () => {
     // }, [isSuccessDeletedMany]);
 
     useEffect(() => {
-        if (isSuccessDeleted && dataDeleted?.status === 'OK') {
-            message.success();
+        if (dataDeleted?.status === 'OK') {
+            message.success(dataDeleted?.message);
             handleCancelDelete();
-        } else if (isErrorDeleted) {
-            message.error();
+            queryBrand.refetch();
+        } else if (dataDeleted?.status === 'ERR') {
+            message.error(dataDeleted?.message);
         }
-    }, [isSuccessDeleted]);
+    }, [dataDeleted]);
     const handleCloseDrawer = () => {
         setIsOpenDrawer(false);
         setStateBrandDetails({
@@ -215,6 +249,11 @@ const AdminBrand = () => {
     };
 
     const handleDeleteBrand = () => {
+        const selectedBrand = dataTable?.find(item => item._id === rowSelected);
+        if (selectedBrand?.productCount > 0) {
+            return;
+        }
+
         mutationDeleted.mutate(
             { id: rowSelected, token: user?.access_token },
             {
@@ -423,7 +462,26 @@ const AdminBrand = () => {
                 onOk={handleDeleteBrand}
             >
                 <Loading isLoading={isLoadingDeleted}>
-                    <div>Bạn có muốn xóa thương hiệu này không ? </div>
+                    <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                        {(() => {
+                            const selectedBrand = dataTable?.find(item => item._id === rowSelected);
+                            if (!selectedBrand) return null;
+
+                            if (selectedBrand.productCount > 0) {
+                                return (
+                                    <div style={{ color: 'red', fontSize: '16px' }}>
+                                        Không thể xóa thương hiệu "{selectedBrand.name}" vì đang có {selectedBrand.productCount} sản phẩm!
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div style={{ fontSize: '16px' }}>
+                                    Bạn có chắc chắn muốn xóa thương hiệu "{selectedBrand.name}" không?
+                                </div>
+                            );
+                        })()}
+                    </div>
                 </Loading>
             </ModalComponet>
         </div>
