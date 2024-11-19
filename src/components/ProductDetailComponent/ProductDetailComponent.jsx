@@ -90,7 +90,6 @@ const ProductDetailComponent = ({ idProduct }) => {
         if (!user?.id) {
             navigate('/sign-in', { state: localtion?.pathname });
         } else {
-            // navigate('/orders');
             const orderRedux = order?.orderItems?.find((item) => item.product === productDetails?._id);
             if (
                 orderRedux?.amount + numProduct <= orderRedux?.countInstock ||
@@ -110,6 +109,7 @@ const ProductDetailComponent = ({ idProduct }) => {
                     }),
                 );
             } else {
+                // navigate('/orders');
                 setErrorLimitOrder(true);
             }
             // console.log('datngu', orderRedux);
@@ -126,7 +126,7 @@ const ProductDetailComponent = ({ idProduct }) => {
                         alt="product_1"
                         preview={false}
                     ></Image>
-                    <Row style={{ margin: '10px 0 0 15px', display: 'flex' }}>
+                    {/* <Row style={{ margin: '10px 0 0 15px', display: 'flex' }}>
                         <StyleImageSmallProduct span={4}>
                             <StyleImageSmall src={product1small} alt="product_1" preview={false}></StyleImageSmall>
                         </StyleImageSmallProduct>
@@ -142,16 +142,20 @@ const ProductDetailComponent = ({ idProduct }) => {
                         <StyleImageSmallProduct span={4}>
                             <StyleImageSmall src={product1small} alt="product_1" preview={false}></StyleImageSmall>
                         </StyleImageSmallProduct>
-                    </Row>
+                    </Row> */}
                 </StyleImageDetails>
                 <Col style={{ paddingLeft: '10px' }} span={14}>
                     <StyleNameProduct>{productDetails?.name}</StyleNameProduct>
-                    <StyleNameProduct>Loại Đàn: {productDetails?.type}</StyleNameProduct>
-                    <StyleNameProduct>Thương hiệu: Taylor</StyleNameProduct>
+                    <StyleNameProduct>Danh mục: {productDetails?.category?.name}</StyleNameProduct>
+                    <StyleNameProduct>Dáng đàn: {productDetails?.type}</StyleNameProduct>
+                    <StyleNameProduct>Thương hiệu: {productDetails?.brand?.name}</StyleNameProduct>
                     <StyleNameProduct>Số lượng: {productDetails?.countInStock}</StyleNameProduct>
+                    {/* <StyleNameProduct>Kiểu dáng: {productDetails?.type}</StyleNameProduct> */}
                     <div>
                         <Rate allowHalf value={productDetails?.rating} />
-                        <StyleTextSell> | Đã bán: {productDetails?.selled}</StyleTextSell>
+                        <StyleTextSell>
+                            | Đã bán: <span style={{ fontWeight: '600' }}>{productDetails?.selled}</span>
+                        </StyleTextSell>
                     </div>
                     <StylePriceProduct>
                         <StylePriceTextProduct>{convertPrice(productDetails?.price)}</StylePriceTextProduct>
@@ -206,8 +210,14 @@ const ProductDetailComponent = ({ idProduct }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
                         <div>
                             <ButtonComponent
+                                size={40}
                                 style={{
-                                    backgroundColor: '#fff',
+                                    backgroundColor: 'rgb(255,57,69)',
+                                    color: '#fff',
+                                    width: '240px',
+                                    height: '38px',
+                                    borderRadius: '4px',
+                                    fontWeight: '400',
                                 }}
                                 onClick={handleAddOrderProduct}
                                 textButton={'Thêm vào giỏ hàng'}

@@ -26,12 +26,12 @@ const CategoryProductPage = () => {
         const res = await ProductService.getProductCategory(category, page, limit);
         if (res?.status === 'OK') {
             setLoading(false);
-            setProducts(res?.data);
+            setProducts(res?.data?.name);
             setPanigate({ ...panigate, total: res?.totalPage });
         } else {
             setLoading(false);
         }
-        // console.log('datt', res);
+        console.log('datt', res);
     };
 
     useEffect(() => {

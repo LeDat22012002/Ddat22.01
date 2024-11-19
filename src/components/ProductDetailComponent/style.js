@@ -28,7 +28,7 @@ export const StyleImageSmallProduct = styled(Col)`
 
 export const StyleNameProduct = styled.h3`
     color: rgb(36, 36, 36);
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 400;
     line-height: 36px;
     word-break: break-word;

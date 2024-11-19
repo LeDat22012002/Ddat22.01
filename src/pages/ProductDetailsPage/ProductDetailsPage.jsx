@@ -6,7 +6,7 @@ const ProductDetailsPage = () => {
     const navigate = useNavigate();
 
     return (
-        <div style={{ padding: '0 120px', backgroundColor: '#efefef' }}>
+        <div style={{ padding: '0 120px', backgroundColor: '#efefef', marginTop: '60px' }}>
             <div>
                 <h5
                     style={{

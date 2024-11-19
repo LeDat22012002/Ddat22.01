@@ -238,7 +238,7 @@ const AdminProduct = () => {
             },
         },
         {
-            title: 'Danh mục',
+            title: 'Dáng đàn',
             dataIndex: 'type',
         },
         {
@@ -379,6 +379,12 @@ const AdminProduct = () => {
             [e.target.name]: e.target.value,
         });
     };
+    // const handleOnchangeDetailsType = (value) => {
+    //     setStateProductDetails({
+    //         ...stateProductDetails,
+    //         type: value,
+    //     });
+    // };
     const handleOnchangeDetailsCategory = (value) => {
         setStateProductDetails({
             ...stateProductDetails,
@@ -672,12 +678,12 @@ const AdminProduct = () => {
                         </Form.Item>
                         <Form.Item
                             wrapperCol={{
-                                offset: 20,
+                                offset: 17,
                                 span: 16,
                             }}
                         >
                             <Button type="primary" htmlType="submit">
-                                Submit
+                                Thêm sản phẩm
                             </Button>
                         </Form.Item>
                     </Form>
@@ -723,7 +729,7 @@ const AdminProduct = () => {
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Danh mục  "
+                            label="Size "
                             name="type"
                             rules={[
                                 {

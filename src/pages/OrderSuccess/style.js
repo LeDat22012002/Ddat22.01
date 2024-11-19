@@ -25,7 +25,7 @@ export const WrapperValue = styled.div`
 `;
 
 export const WrapperContainer = styled.div`
-    width: 100%;
+    width: 80%;
 `;
 export const WrapperListOrder = styled.div``;
 
@@ -71,13 +71,12 @@ export const WrapperInfo = styled.div`
     width: 100%;
 `;
 export const WrapperItemOrderInfo = styled.div`
-    padding: 17px 20px;
+    padding: 17px 18px;
     border-bottom: 1px solid #f5f5f5;
     background: #fff;
     border-top-right-radius: 6px;
     border-top-left-radius: 6px;
     width: 100%;
-    display: flex;
     justify-content: flex-start;
 `;
 

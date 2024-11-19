@@ -105,7 +105,14 @@ const HeaderComponent = ({ isHeddenSearch = false, isHeddenCart = false }) => {
     };
 
     return (
-        <div style={{ width: '100%', backgroundColor: '#333333', display: 'flex', justifyContent: 'center' }}>
+        <div
+            style={{
+                width: '100%',
+                backgroundColor: '#333333',
+                display: 'flex',
+                justifyContent: 'center',
+            }}
+        >
             <WrapperHeader
                 style={{ justifyContent: isHeddenSearch && isHeddenSearch ? 'space-between' : 'unset' }}
                 gutter={16}
@@ -168,7 +175,7 @@ const HeaderComponent = ({ isHeddenSearch = false, isHeddenCart = false }) => {
                                 <ShoppingCartOutlined style={{ fontSize: '30px', color: '#fff' }} />
                             </Badge>
 
-                            <WrapperTextHeaderSmall WrapperTextHeaderSmall>Giỏ hàng</WrapperTextHeaderSmall>
+                            <WrapperTextHeaderSmall WrapperTextHeaderSmall></WrapperTextHeaderSmall>
                         </div>
                     )}
                 </Col>

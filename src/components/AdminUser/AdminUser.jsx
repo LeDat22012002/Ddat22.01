@@ -23,12 +23,12 @@ const AdminUser = () => {
     const user = useSelector((state) => state?.user);
 
     const [stateUserDetails, setStateUserDetails] = useState({
-        name: '',
-        email: '',
-        phone: '',
+        // name: '',
+        // email: '',
+        // phone: '',
         isAdmin: false,
-        avatar: '',
-        address: '',
+        // avatar: '',
+        // address: '',
     });
 
     const [form] = Form.useForm();
@@ -146,7 +146,7 @@ const AdminUser = () => {
             dataIndex: 'address',
         },
         {
-            title: 'Admin',
+            title: 'Phân quyền',
             dataIndex: 'isAdmin',
             filters: [
                 {
@@ -182,7 +182,7 @@ const AdminUser = () => {
             return {
                 ...user,
                 key: user._id,
-                isAdmin: user.isAdmin ? 'TRUE' : 'FALSE',
+                isAdmin: user.isAdmin ? 'ADMIN' : 'NGƯỜI DÙNG',
             };
         });
 
@@ -312,18 +312,19 @@ const AdminUser = () => {
                         form={form}
                     >
                         <Form.Item
-                            label="Tên người dùng"
+                            label="Name"
                             name="name"
                             rules={[
                                 {
-                                    required: true,
+                                    required: false,
                                     message: 'Vui lòng nhập tên người dùng!',
                                 },
                             ]}
                         >
                             <InputComPonent
-                                value={stateUserDetails.name}
-                                onChange={handleOnchangeDetails}
+                                disabled
+                                // value={stateUserDetails.name}
+                                // onChange={handleOnchangeDetails}
                                 name="name"
                             />
                         </Form.Item>
@@ -332,14 +333,15 @@ const AdminUser = () => {
                             name="email"
                             rules={[
                                 {
-                                    required: true,
+                                    required: false,
                                     message: 'Vui lòng nhập Email',
                                 },
                             ]}
                         >
                             <InputComPonent
-                                value={stateUserDetails.email}
-                                onChange={handleOnchangeDetails}
+                                disabled
+                                // value={stateUserDetails.email}
+                                // onChange={handleOnchangeDetails}
                                 name="email"
                             />
                         </Form.Item>
@@ -348,30 +350,49 @@ const AdminUser = () => {
                             name="phone"
                             rules={[
                                 {
-                                    required: true,
+                                    required: false,
                                     message: 'Vui lòng nhập Phone',
                                 },
                             ]}
                         >
                             <InputComPonent
-                                value={stateUserDetails.phone}
-                                onChange={handleOnchangeDetails}
+                                disabled
+                                // value={stateUserDetails.phone}
+                                // onChange={handleOnchangeDetails}
                                 name="phone"
                             />
                         </Form.Item>
                         <Form.Item
-                            label="Địa chỉ"
-                            name="address"
+                            label="Role"
+                            name="isAdmin"
                             rules={[
                                 {
                                     required: true,
+                                    message: 'Vui lòng nhập Role',
+                                },
+                            ]}
+                        >
+                            <InputComPonent
+                                value={stateUserDetails.isAdmin}
+                                onChange={handleOnchangeDetails}
+                                name="isAdmin"
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Address"
+                            name="address"
+                            rules={[
+                                {
+                                    required: false,
                                     message: 'Vui lòng nhập Address',
                                 },
                             ]}
                         >
                             <InputComPonent
-                                value={stateUserDetails.address}
-                                onChange={handleOnchangeDetails}
+                                disabled
+                                // value={stateUserDetails.address}
+                                // onChange={handleOnchangeDetails}
                                 name="address"
                             />
                         </Form.Item>
@@ -381,12 +402,12 @@ const AdminUser = () => {
                             name="avatar"
                             rules={[
                                 {
-                                    required: true,
+                                    required: false,
                                     message: 'Vui lòng chọn avatar ',
                                 },
                             ]}
                         >
-                            <WrapperUploadFile WrapperUploadFile onChange={handleOnchangeAvatarDetails} maxCount={1}>
+                            <WrapperUploadFile onChange={handleOnchangeAvatarDetails} maxCount={1}>
                                 <Button>select file</Button>
                                 {stateUserDetails?.avatar && (
                                     <img

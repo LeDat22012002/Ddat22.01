@@ -11,7 +11,7 @@ export const WrapperInfoUser = styled.div`
     flex-direction: column;
 `;
 export const WrapperLabel = styled.label`
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 500;
 `;
 export const WrapperContentInfo = styled.div`
@@ -35,24 +35,27 @@ export const WrapperItemLabel = styled.div`
     width: 200px;
     font-size: 16px;
     font-weight: 400;
-    margin-right: 30px;
+    margin-right: 10px;
 `;
 export const WrapperProduct = styled.div`
     display: flex;
-    align-items: flex-start;
-
+    // justify-content: space-between;
+    align-items: center;
     margin-right: 10px;
 `;
 export const WrapperNameProduct = styled.div`
+    width: 400px;
+    font-size: 15px;
+    font-weight: 500;
     display: flex;
-    align-items: flex-start;
-    width: 670px;
+    justify-content: space-between;
 `;
 export const WrapperItem = styled.div`
     width: 200px;
     font-weight: bold;
     font-size: 15px;
     margin-right: 30px;
+
     &.last-child {
         color: red;
     }

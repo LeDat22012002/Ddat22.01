@@ -77,7 +77,7 @@ const ProfilePage = () => {
         // console.log('update', email, name, phone, address, avatar);
     };
     return (
-        <div style={{ width: '1270px', margin: '0 auto' }}>
+        <div style={{ width: '1270px', margin: '0 auto', marginTop: '80px', marginBottom: '10px' }}>
             <WrapperHeader>Thông tin người dùng</WrapperHeader>
             <Loading isLoading={isLoading}>
                 <WrapperContentProfile>

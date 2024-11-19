@@ -17,7 +17,7 @@ const TypeProductPage = () => {
     const [loading, setLoading] = useState(false);
     const [panigate, setPanigate] = useState({
         page: 0,
-        limit: 10,
+        limit: 8,
         total: 1,
     });
     const fetchProductType = async (type, page, limit) => {
@@ -44,7 +44,7 @@ const TypeProductPage = () => {
 
     return (
         <Loading isLoading={loading}>
-            <div style={{ backgroundColor: '#efefef', width: '100%', height: 'calc(100vh-64px)' }}>
+            <div style={{ backgroundColor: '#efefef', width: '100%', height: 'calc(100vh-64px)', marginTop: '60px' }}>
                 <div style={{ width: '1270px', margin: '0 auto', height: '100%' }}>
                     <Row style={{ flexWrap: 'nowrap', paddingTop: '10px', height: 'calc(100% -20px)' }}>
                         <WrapperNavbar span={4}>

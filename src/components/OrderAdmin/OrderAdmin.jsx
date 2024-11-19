@@ -69,8 +69,8 @@ const OrderAdmin = () => {
                 phone: order?.shippingAddress?.phone,
                 address: order?.shippingAddress?.address,
                 paymentMethod: orderContant.payment[order?.paymentMethod],
-                isPaid: order?.isPaid ? 'TRUE' : 'FALSE',
-                isDelivered: order?.isDelivered ? 'TRUE' : 'FALSE',
+                isPaid: order?.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán',
+                isDelivered: order?.isDelivered ? 'Đã giao hàng' : 'Chưa giao hàng',
                 totalPrice: convertPrice(order?.totalPrice),
             };
         });

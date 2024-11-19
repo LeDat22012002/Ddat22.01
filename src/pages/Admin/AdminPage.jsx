@@ -42,7 +42,7 @@ const AdminPage = () => {
     return (
         <>
             <HeaderComponent isHeddenSearch isHeddenCart />
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', marginTop: '70px' }}>
                 <Menu
                     mode="inline"
                     style={{

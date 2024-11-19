@@ -224,7 +224,7 @@ const OrdersPage = () => {
     ];
 
     return (
-        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
+        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', marginTop: '60px' }}>
             <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
                 <h3
                     style={{
@@ -243,7 +243,7 @@ const OrdersPage = () => {
                             <Step
                                 items={itemsDelivery}
                                 current={
-                                    diliveryPriceMemo === 10000
+                                    diliveryPriceMemo === 30000
                                         ? 2
                                         : diliveryPriceMemo === 20000
                                         ? 1
@@ -477,6 +477,7 @@ const OrdersPage = () => {
                                 width: '320px',
                                 border: 'none',
                                 borderRadius: '4px',
+                                color: '#fff',
                             }}
                             textButton={'Mua hàng'}
                         ></ButtonComponent>

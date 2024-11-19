@@ -19,51 +19,60 @@ const routes = [
         path: '/',
         page: HomePage,
         isShowHeader: true,
+        isShowFooter: true,
     },
     {
         path: '/orders',
         page: OrdersPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
 
     {
         path: '/my-order',
         page: MyOrdersPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
 
     {
         path: '/details-order/:id',
         page: DetailsOrderPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
 
     {
         path: '/payment',
         page: PaymentPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
 
     {
         path: '/orderSuccess',
         page: OrderSuccessPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
 
     {
         path: '/producs',
         page: ProductsPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
     {
         path: '/product/:type',
         page: TypeProductPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
     {
         path: '/products/:category',
         page: CategoryProductPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
     {
         path: '/sign-in',
@@ -79,16 +88,19 @@ const routes = [
         path: '/product-detail/:id',
         page: ProductDetailsPage,
         isShowHeader: true,
+        isShowFooter: true,
     },
     {
         path: '/profile',
         page: ProfilePage,
         isShowHeader: true,
+        isShowFooter: true,
     },
     {
         path: '/system/admin',
         page: AdminPage,
         isShowHeader: false,
+        isShowFooter: false,
         isPrivate: true,
     },
     {

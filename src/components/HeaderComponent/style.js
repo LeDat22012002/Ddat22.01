@@ -7,7 +7,19 @@ export const WrapperHeader = styled(Row)`
     align-items: center;
     gap: 16px;
     flex-wrap: nowrap;
+    width: 100%;
+    padding: 10px 0;
+    position: fixed;
+    z-index: 10;
+`;
+export const WrapperHeader1 = styled(Row)`
     width: 1270px;
+    padding: 10px 120px;
+    background-color: #333333;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: nowrap;
+
     padding: 10px 0;
 `;
 
@@ -15,7 +27,7 @@ export const WrapperTextHeader = styled.span`
     font-size: 18px;
     color: #ffff;
     font-weight: 500;
-    text-align: left;
+    margin-left: 60px;
 `;
 
 export const WrapperHeaderAccount = styled.div`

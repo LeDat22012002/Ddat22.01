@@ -1,3 +1,4 @@
+import { Radio } from 'antd';
 import styled from 'styled-components';
 
 export const WrapperStyleHeader = styled.div`
@@ -59,7 +60,7 @@ export const WrapperInfo = styled.div`
     margin-bottom: 2px;
 `;
 
-export const WrapperRadio = styled.div`
+export const WrapperRadio = styled(Radio.Group)`
     margin-top: 20px;
     display: flex;
     justify-content: flex-start;

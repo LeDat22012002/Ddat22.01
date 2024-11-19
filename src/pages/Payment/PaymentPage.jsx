@@ -11,18 +11,22 @@ import InputComPonent from '../../components/InputComponent/InputComponent';
 import { useMutationHooks } from '../../hook/useMutationHook';
 import * as UserService from '../../services/UserService';
 import * as OrderService from '../../services/OrderService';
+import * as PaymentService from '../../services/PaymentService';
 import Loading from '../../components/LoadingComponent/Loading';
 import * as message from '../../components/MessageComponent/Message';
 import { updateUser } from '../../redux/slides/userSlide';
 import { useNavigate } from 'react-router-dom';
 import { removeAllOrderProduct } from '../../redux/slides/orderSlide';
+import { PayPalButton } from 'react-paypal-button-v2';
 
 const PaymentPage = () => {
     const navigate = useNavigate();
     const order = useSelector((state) => state.order);
     const user = useSelector((state) => state.user);
+
     const [payment, setPayment] = useState('later_money');
     const [delivery, setDelivery] = useState('fast');
+    const [sdkReady, setSdkReady] = useState(false);
     const [isModalUpdateInfo, setIsModalUpdateInfo] = useState(false);
 
     const [stateUserDetails, setStateUserDetails] = useState({
@@ -195,13 +199,53 @@ const PaymentPage = () => {
     const handleDilivery = (e) => {
         setDelivery(e.target.value);
     };
+    const onSuccessPaypal = (details, data) => {
+        // console.log('details, data', details, data);
+        mutationAddOrder.mutate({
+            token: user?.access_token,
+            orderItems: order?.orderItemsSelected,
+            fullName: user?.name,
+            address: user?.address,
+            phone: user?.phone,
+            city: user?.city,
+            paymentMethod: payment,
+            itemsPrice: priceMemo,
+            shippingPrice: diliveryPriceMemo,
+            totalPrice: totalPriceMeno,
+            user: user?.id,
+            email: user?.email,
+            isPaid: true,
+            paidAt: details.update_time,
+        });
+    };
 
     const handlePayment = (e) => {
         setPayment(e.target.value);
     };
 
+    const addPaypalScript = async () => {
+        const { data } = await PaymentService.getConfig();
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = `https://sandbox.paypal.com/sdk/js?client-id=${data}`;
+        script.async = true;
+        script.onload = () => {
+            setSdkReady(true);
+        };
+        document.body.appendChild(script);
+        // console.log('dattts', data);
+    };
+
+    useEffect(() => {
+        if (!window.paypal) {
+            addPaypalScript();
+        } else {
+            setSdkReady(true);
+        }
+    }, []);
+
     return (
-        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
+        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', marginTop: '60px' }}>
             <Loading isLoading={isLoadingAddOrder}>
                 <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
                     <h3
@@ -271,6 +315,18 @@ const PaymentPage = () => {
                                             value="later_money"
                                         >
                                             Thanh toán khi nhận hàng
+                                        </Radio>
+                                        <Radio
+                                            style={{
+                                                backgroundColor: 'rgb(240, 248, 255)',
+                                                padding: '20px',
+                                                borderRadius: '4px',
+                                                fontSize: '15px',
+                                                fontWeight: '500',
+                                            }}
+                                            value="paypal"
+                                        >
+                                            Thanh toán bằng Paypal
                                         </Radio>
                                     </WrapperRadio>
                                 </div>
@@ -357,18 +413,32 @@ const PaymentPage = () => {
                                     </span>
                                 </WrapperTotal>
                             </div>
-                            <ButtonComponent
-                                onClick={() => handleAddOrder()}
-                                size={40}
-                                style={{
-                                    backgroundColor: 'rgb(255 ,57,69)',
-                                    height: '48px',
-                                    width: '320px',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                }}
-                                textButton={'Đặt hàng'}
-                            ></ButtonComponent>
+                            {payment === 'paypal' && sdkReady ? (
+                                <div style={{ width: '320px' }}>
+                                    <PayPalButton
+                                        amount={totalPriceMeno}
+                                        // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
+                                        onSuccess={onSuccessPaypal}
+                                        onError={() => {
+                                            alert('Thanh toán thất bại');
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <ButtonComponent
+                                    onClick={() => handleAddOrder()}
+                                    size={40}
+                                    style={{
+                                        backgroundColor: 'rgb(255 ,57,69)',
+                                        height: '48px',
+                                        width: '320px',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        color: '#fff',
+                                    }}
+                                    textButton={'Đặt hàng'}
+                                ></ButtonComponent>
+                            )}
                         </WrapperRight>
                     </div>
                 </div>

@@ -23,7 +23,7 @@ const SignUpPage = () => {
     const { data, isLoading, isSuccess, isError } = mutation;
 
     useEffect(() => {
-        if (isSuccess) {
+        if (isSuccess && data?.status !== 'ERR') {
             message.success();
             handle_SignIn();
         } else if (isError) {
@@ -72,7 +72,7 @@ const SignUpPage = () => {
                 }}
             >
                 <LoginContainerLeft>
-                    <h3>Xin chào!</h3>
+                    <h3 style={{ fontSize: '14px' }}>Xin chào!</h3>
                     <p style={{ fontSize: '15px', fontWeight: '500' }}>Đăng nhập hoặc tạo tài khoản</p>
                     <InputForm
                         style={{ marginBottom: '10px' }}
@@ -116,9 +116,13 @@ const SignUpPage = () => {
                             onClick={handleSignUp}
                             style={{
                                 backgroundColor: 'rgb(255,57,69)',
+                                color: '#fff',
+                                width: '240px',
+                                height: '38px',
+                                borderRadius: '4px',
+                                fontWeight: '400',
                                 margin: '26px 0 10px',
                                 border: 'none',
-                                height: '40px',
                             }}
                             textButton={'Đăng kí '}
                         ></ButtonComponent>

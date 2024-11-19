@@ -122,6 +122,11 @@ const SignInPage = () => {
                             onClick={handleSignIn}
                             style={{
                                 backgroundColor: 'rgb(255,57,69)',
+                                color: '#fff',
+                                width: '240px',
+                                height: '38px',
+                                borderRadius: '4px',
+                                fontWeight: '400',
                                 margin: '26px 0 10px',
                                 border: 'none',
                             }}

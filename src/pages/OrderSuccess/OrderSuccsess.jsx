@@ -7,7 +7,7 @@ import {
     WrapperItemOrderInfo,
 } from './style';
 // import { StyleInputNumber } from '../../components/ProductDetailComponent/style';
-import { useSelector } from 'react-redux';
+// import { useSelector } from 'react-redux';
 
 import Loading from '../../components/LoadingComponent/Loading';
 import { useLocation } from 'react-router-dom';
@@ -15,13 +15,13 @@ import { orderContant } from '../../Containt';
 import { convertPrice } from '../../utils';
 
 const OrderSuccessPage = () => {
-    const order = useSelector((state) => state.order);
+    // const order = useSelector((state) => state.order);
     const location = useLocation();
     // console.log('location', location);
     const { state } = location;
 
     return (
-        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh' }}>
+        <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', marginTop: '60px' }}>
             <Loading isLoading={false}>
                 <div style={{ height: '100%', width: '1270px', margin: '0 auto' }}>
                     <h3
@@ -63,7 +63,7 @@ const OrderSuccessPage = () => {
                                         <WrapperItemOrder key={order?.name}>
                                             <div
                                                 style={{
-                                                    width: '500px',
+                                                    width: '400px',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '4px',
@@ -92,7 +92,7 @@ const OrderSuccessPage = () => {
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '10px',
-                                                    justifyContent: 'space-between',
+                                                    justifyContent: 'space-around',
                                                 }}
                                             >
                                                 <span>
