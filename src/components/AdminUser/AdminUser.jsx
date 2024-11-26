@@ -124,10 +124,7 @@ const AdminUser = () => {
                     style={{ color: 'red', fontSize: '25px', cursor: 'pointer' }}
                     onClick={() => setIsModalOpenDelete(true)}
                 />
-                <EditOutlined
-                    style={{ color: '#000', fontSize: '25px', cursor: 'pointer' }}
-                    onClick={handleDetailsProduct}
-                />
+               
             </div>
         );
     };
@@ -169,6 +166,36 @@ const AdminUser = () => {
             title: 'Phone',
             dataIndex: 'phone',
             sorter: (a, b) => a.phone - b.phone,
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'isActive',
+            render: (text, record) => {
+                return (
+                    <div>
+                        <Button
+                            type={record.isActive ? 'primary' : 'default'}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleChangeActive(record._id, !record.isActive);
+                            }}
+                        >
+                            {record.isActive ? 'Hoạt động' : 'Đã khóa'}
+                        </Button>
+                    </div>
+                );
+            },
+            filters: [
+                {
+                    text: 'Hoạt động',
+                    value: true,
+                },
+                {
+                    text: 'Đã khóa',
+                    value: false,
+                },
+            ],
+            onFilter: (value, record) => record.isActive === value,
         },
         {
             title: 'Action',
@@ -265,6 +292,24 @@ const AdminUser = () => {
             },
         );
     };
+
+    const handleChangeActive = async (userId, newStatus) => {
+        try {
+            const res = await UserService.updateUserActive(userId, {
+                isActive: newStatus
+            }, user?.access_token);
+            
+            if(res?.status === 'OK') {
+                message.success('Cập nhật trạng thái thành công');
+                queryUser.refetch();
+            } else {
+                message.error('Cập nhật trạng thái thất bại');
+            }
+        } catch (error) {
+            message.error('Đã có lỗi xảy ra');
+        }
+    };
+
     return (
         <div>
             <WrapperHeader>Quản lý người dùng</WrapperHeader>

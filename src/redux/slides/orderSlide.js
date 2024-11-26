@@ -83,6 +83,18 @@ export const orderSlice = createSlice({
         logout: (state) => {
             state.orderItems = [];
         },
+        updateAmount: (state, action) => {
+            const { idProduct, amount } = action.payload;
+            const orderItem = state.orderItems.find(item => item.product === idProduct);
+            if (orderItem) {
+                orderItem.amount = amount;
+            }
+            // Cập nhật lại orderItemsSelected nếu sản phẩm đang được chọn
+            const orderSelectedItem = state.orderItemsSelected.find(item => item.product === idProduct);
+            if (orderSelectedItem) {
+                orderSelectedItem.amount = amount;
+            }
+        }
     },
 });
 
@@ -96,6 +108,7 @@ export const {
     selectedOrder,
     resetOrder,
     logout,
+    updateAmount
 } = orderSlice.actions;
 
 export default orderSlice.reducer;

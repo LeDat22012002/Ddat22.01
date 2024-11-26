@@ -22,6 +22,7 @@ import {
     removeAllOrderProduct,
     removeOrderProduct,
     selectedOrder,
+    updateAmount,
 } from '../../redux/slides/orderSlide';
 import { useEffect, useMemo, useState } from 'react';
 import { convertPrice } from '../../utils';
@@ -41,6 +42,7 @@ const OrdersPage = () => {
     const user = useSelector((state) => state.user);
     const [isModalUpdateInfo, setIsModalUpdateInfo] = useState(false);
     const [listChecked, setListChecked] = useState([]);
+    const [numProduct, setNumProduct] = useState({});
 
     const [stateUserDetails, setStateUserDetails] = useState({
         name: '',
@@ -69,7 +71,7 @@ const OrdersPage = () => {
         }
     }, [isModalUpdateInfo]);
 
-    // Tạm tính
+    // Tạm tnh
     const priceMemo = useMemo(() => {
         const result = order?.orderItemsSelected?.reduce((total, cur) => {
             return total + cur.price * cur.amount;
@@ -150,15 +152,31 @@ const OrdersPage = () => {
         }
     };
 
+    // Lấy trạng thái active từ user data một cách rõ ràng
+    const isUserActive = useSelector((state) => {
+        const active = state.user?.isActive;
+        return active === true; // Đảm bảo trả về boolean
+    });
+
+    // Log để debug
+    console.log('User active status:', isUserActive);
+
+    // Hàm xử lý đặt hàng
     const handleAddCard = () => {
-        // console.log('user', user);
-        if (!order?.orderItemsSelected?.length) {
-            message.error('Vui lòng chọn sản phẩm để thanh toán');
-        } else if (!user?.phone || !user?.address || !user.name || !user.city) {
-            setIsModalUpdateInfo(true);
-        } else {
-            navigate('/payment');
+        if (isUserActive === false) {
+            message.error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để được hỗ trợ!');
+            return;
         }
+
+        if(!order?.orderItemsSelected?.length) {
+            message.error('Vui lòng chọn sản phẩm');
+            return;
+        }
+        if(!user?.phone || !user?.address || !user?.name || !user?.city) {
+            setIsModalUpdateInfo(true);
+            return;
+        }
+        navigate('/payment');
     };
 
     const mutationUpdate = useMutationHooks((data) => {
@@ -222,6 +240,44 @@ const OrdersPage = () => {
             description: 'Trên 5.000.000 VNĐ',
         },
     ];
+
+    const handleChangeNumProduct = (value, order) => {
+        // Kiểm tra nếu value không phải số hoặc rỗng
+        if (!value || isNaN(value)) {
+            return;
+        }
+
+        const numValue = Number(value);
+        
+        // Kiểm tra giới hạn
+        if (numValue > order.countInstock) {
+            message.error('Số lượng vượt quá số lượng trong kho!');
+            setNumProduct({
+                ...numProduct,
+                [order.product]: order.countInstock
+            });
+            return;
+        }
+
+        if (numValue < 1) {
+            setNumProduct({
+                ...numProduct,
+                [order.product]: 1
+            });
+            return;
+        }
+
+        setNumProduct({
+            ...numProduct,
+            [order.product]: numValue
+        });
+        
+        // Cập nhật số lượng trong redux
+        dispatch(updateAmount({ 
+            idProduct: order.product,
+            amount: numValue 
+        }));
+    };
 
     return (
         <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', marginTop: '60px' }}>
@@ -347,8 +403,10 @@ const OrdersPage = () => {
                                                     ></MinusOutlined>
                                                 </button>
                                                 <StyleInputNumber
-                                                    defaultValue={order?.amount}
-                                                    value={order?.amount}
+                                                    min={1}
+                                                    max={order?.countInstock}
+                                                    value={numProduct[order?.product] || order?.amount}
+                                                    onChange={(value) => handleChangeNumProduct(value, order)}
                                                     size="small"
                                                 ></StyleInputNumber>
                                                 <button
@@ -472,14 +530,16 @@ const OrdersPage = () => {
                             onClick={() => handleAddCard()}
                             size={40}
                             style={{
-                                backgroundColor: 'rgb(255 ,57,69)',
+                                backgroundColor: isUserActive === true ? 'rgb(255, 57, 69)' : '#ccc',
                                 height: '48px',
                                 width: '320px',
                                 border: 'none',
                                 borderRadius: '4px',
                                 color: '#fff',
+                                cursor: isUserActive === true ? 'pointer' : 'not-allowed'
                             }}
-                            textButton={'Mua hàng'}
+                            textButton={isUserActive === true ? 'Mua hàng' : 'Tài khoản bị khóa'}
+                            disabled={!isUserActive}
                         ></ButtonComponent>
                     </WrapperRight>
                 </div>

@@ -70,3 +70,16 @@ export const deleteManyUser = async (data, access_token) => {
 
     return res.data;
 };
+
+export const updateUserActive = async (id, data, access_token) => {
+    const res = await axiosJWT.patch(
+        `${process.env.REACT_APP_API_URL}/user/update-active/${id}`, 
+        data,
+        {
+            headers: {
+                token: `Bearer ${access_token}`,
+            },
+        }
+    );
+    return res.data;
+};
