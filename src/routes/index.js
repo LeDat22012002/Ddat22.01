@@ -13,7 +13,7 @@ import ProfilePage from '../pages/Profile/Profile';
 import SignInPage from '../pages/SignInPage/SignInPage';
 import SignUpPage from '../pages/SignUpPage/SignUpPage';
 import TypeProductPage from '../pages/TypeProductPage/TypeProductPage';
-
+import DetailOrderAdmin from '../components/OrderAdmin/DetailOrderAdmin';
 const routes = [
     {
         path: '/',
@@ -34,12 +34,19 @@ const routes = [
         isShowHeader: true,
         isShowFooter: true,
     },
+    {
+        path: '/order-details/:id',
+        page: DetailOrderAdmin,
+        isShowHeader: true,
+        isShowFooter: true,
+    },
 
     {
         path: '/details-order/:id',
         page: DetailsOrderPage,
         isShowHeader: true,
         isShowFooter: true,
+        isPrivate: true,
     },
 
     {

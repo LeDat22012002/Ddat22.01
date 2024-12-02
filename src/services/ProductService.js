@@ -1,31 +1,34 @@
 import axios from 'axios';
 import { axiosJWT } from './UserService';
 
-// Get all products with filter
-export const getAllProduct = async (search, limit, sort) => {
+// Get all products with filter and pagination
+export const getAllProduct = async (search, limit = 8, page = 1, sort = 'newest') => {
     try {
         let url = `${process.env.REACT_APP_API_URL}/product/getAll-product`;
-        let params = {};
+        let params = {
+            limit,
+            page: page - 1,
+            sort
+        };
+
+     
 
         if (search?.length > 0) {
-            params = {
-                filter: ['name', search],
-                limit,
-            };
-        } else {
-            params = {
-                limit,
-                sort,
-            };
+            params.filter = ['name', search];
         }
 
-        const res = await axios.get(url, { params });
-        return res.data;
+        const response = await axios.get(url, { params });
+        console.log('Response:', response.data);
+        return response.data;
+
     } catch (error) {
-        console.error('Error getting all products:', error);
-        throw error;
+        console.error('Failed to fetch products:', error);
+        return {
+            status: 'ERR',
+            message: error.response?.data?.message || 'Failed to fetch products'
+        };
     }
-};
+}
 
 // Get products by type
 export const getProductType = async (type, page, limit) => {
@@ -46,18 +49,18 @@ export const getProductType = async (type, page, limit) => {
     }
 };
 // Lấy tất cả sản phẩm theo danh mục
-export const getProductCategory = async (categoryId, page = 0, limit = 20, sort = 'newest') => {
+export const getProductCategory = async (categoryId, page = 0, limit = 20) => {
     try {
-        if (!categoryId) return null;
+      
 
         // Sử dụng filter với category
         const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/getAll-product`, {
             params: {
                 filter: 'category',
-                filter: categoryId,
+             
                 page,
                 limit,
-                sort,
+                
             },
         });
         return res.data;

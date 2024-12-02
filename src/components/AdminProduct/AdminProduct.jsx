@@ -84,8 +84,11 @@ const AdminProduct = () => {
         return res;
     });
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(8);
+
     const getAllProducts = async () => {
-        const res = await ProductService.getAllProduct();
+        const res = await ProductService.getAllProduct('', limit, currentPage);
         return res;
     };
     const fetchgetDetailsProduct = async (rowSelected) => {
@@ -167,7 +170,15 @@ const AdminProduct = () => {
         isError: isErrorDeletedMany,
     } = mutationDeletedMany;
     // console.log('dataUpdated', dataUpdated);
-    const queryProduct = useQuery(['products'], getAllProducts);
+    const queryProduct = useQuery(
+        ['products', currentPage, limit],
+        getAllProducts,
+        {
+            retry: 3,
+            retryDelay: 1000,
+            keepPreviousData: true,
+        }
+    );
     const queryCategory = useQuery(['categorys'], fetchAllCategoryProduct);
     const queryBrand = useQuery(['brands'], fetchAllBrandProduct);
     const queryTypeProduct = useQuery(['type-product'], fetchAllTypeProduct);
@@ -260,6 +271,7 @@ const AdminProduct = () => {
         if (isSuccess && data?.status === 'OK') {
             message.success();
             handleCancel();
+            setCurrentPage(1);
         } else if (isError) {
             message.error();
         }
@@ -292,6 +304,7 @@ const AdminProduct = () => {
         if (isSuccessDeleted && dataDeleted?.status === 'OK') {
             message.success();
             handleCancelDelete();
+            setCurrentPage(1);
         } else if (isErrorDeleted) {
             message.error();
         }
@@ -317,6 +330,7 @@ const AdminProduct = () => {
         if (isSuccessUpdated && dataUpdated?.status === 'OK') {
             message.success();
             handleCloseDrawer();
+            setCurrentPage(1);
         } else if (isErrorUpdated) {
             message.error();
         }
@@ -444,6 +458,14 @@ const AdminProduct = () => {
 
     // console.log('value={stateProduct.type}', stateProduct);
 
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= (products?.pagination?.totalPages || 1)) {
+            setCurrentPage(newPage);
+            setLimit(8);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     return (
         <div>
             <WrapperHeader>Quản lý sản phẩm</WrapperHeader>
@@ -468,7 +490,61 @@ const AdminProduct = () => {
                             },
                         };
                     }}
-                ></TableComponent>
+                />
+                
+                {/* Thêm phân trang */}
+                <div style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    marginTop: '20px',
+                    gap: '8px'
+                }}>
+                    <button
+                        style={{
+                            padding: '8px 16px',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '4px',
+                            cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                            backgroundColor: currentPage === 1 ? '#f5f5f5' : 'white'
+                        }}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1 || isLoadingProducts}
+                    >
+                        Trước
+                    </button>
+
+                    {Array.from({ length: products?.pagination?.totalPages || 1 }).map((_, index) => (
+                        <button
+                            key={index + 1}
+                            style={{
+                                padding: '8px 16px',
+                                border: '1px solid #d9d9d9',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                backgroundColor: currentPage === index + 1 ? 'rgb(11, 116, 229)' : 'white',
+                                color: currentPage === index + 1 ? 'white' : 'black'
+                            }}
+                            onClick={() => handlePageChange(index + 1)}
+                        >
+                            {index + 1}
+                        </button>
+                    ))}
+
+                    <button
+                        style={{
+                            padding: '8px 16px',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '4px',
+                            cursor: currentPage === (products?.pagination?.totalPages || 1) ? 'not-allowed' : 'pointer',
+                            backgroundColor: currentPage === (products?.pagination?.totalPages || 1) ? '#f5f5f5' : 'white'
+                        }}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === (products?.pagination?.totalPages || 1) || isLoadingProducts}
+                    >
+                        Sau
+                    </button>
+                </div>
             </div>
             <ModalComponet forceRender title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isLoading}>

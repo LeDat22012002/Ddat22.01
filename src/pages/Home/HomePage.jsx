@@ -32,6 +32,7 @@ const HomePage = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedBrand, setSelectedBrand] = useState(null);
     const [filteredProducts, setFilteredProducts] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const sortOptions = [
         { value: 'newest', label: 'Mới nhất' },
@@ -50,8 +51,9 @@ const HomePage = () => {
         const limit = context?.queryKey && context?.queryKey[1];
         const search = context?.queryKey && context?.queryKey[2];
         const sort = context?.queryKey && context?.queryKey[3];
-        const categoryId = context?.queryKey && context?.queryKey[4];
-        const brandId = context?.queryKey && context?.queryKey[5];
+        const page = context?.queryKey && context?.queryKey[4];
+        const categoryId = context?.queryKey && context?.queryKey[5];
+        const brandId = context?.queryKey && context?.queryKey[6];
 
         if (categoryId) {
             const res = await ProductService.getProductByCategoryId(categoryId);
@@ -60,7 +62,7 @@ const HomePage = () => {
             const res = await ProductService.getProductByBrandId(brandId);
             return res;
         } else {
-            const res = await ProductService.getAllProduct(search, limit, sort);
+            const res = await ProductService.getAllProduct(search, limit, page, sort);
             return res;
         }
     };
@@ -84,11 +86,15 @@ const HomePage = () => {
         data: products,
         isPreviousData,
         refetch: refetchProducts,
-    } = useQuery(['products', limit, searchDebounce, sort, selectedCategory, selectedBrand], fetchProductAll, {
-        retry: 3,
-        retryDelay: 1000,
-        keepPreviousData: true,
-    });
+    } = useQuery(
+        ['products', limit, searchDebounce, sort, currentPage, selectedCategory, selectedBrand],
+        fetchProductAll,
+        {
+            retry: 3,
+            retryDelay: 1000,
+            keepPreviousData: true,
+        }
+    );
 
     useEffect(() => {
         fetchAllTypeProduct();
@@ -104,9 +110,11 @@ const HomePage = () => {
     // };
 
     const handleSortChange = (value) => {
+        console.log('Sort changed:', value);
         setSort(value);
         setSelectedCategory(null);
         setSelectedBrand(null);
+        setCurrentPage(1);
         refetchProducts();
     };
 
@@ -121,6 +129,18 @@ const HomePage = () => {
         setFilteredProducts(products);
         setLimit(8);
     };
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= (products?.pagination?.totalPages || 1)) {
+            setCurrentPage(newPage);
+            setLimit(8);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchDebounce, sort, selectedCategory, selectedBrand]);
 
     return (
         <Loading isLoading={isLoading || loading}>
@@ -234,22 +254,57 @@ const HomePage = () => {
                                     />
                                 ))}
                             </WrapperProducts>
-                            <div
-                                style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '10px' }}
-                            >
-                                <WrapperButtonMore
-                                    textButton={isPreviousData ? 'Load more' : 'Xem thêm'}
-                                    type="outline"
+                            <div style={{ 
+                                width: '100%', 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                marginTop: '20px',
+                                gap: '8px'
+                            }}>
+                                <button
                                     style={{
-                                        border: '1px solid rgb(11, 116, 229)',
-                                        color: 'rgb(11, 116, 229)',
-                                        width: '240px',
-                                        height: '38px',
+                                        padding: '8px 16px',
+                                        border: '1px solid #d9d9d9',
                                         borderRadius: '4px',
+                                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage === 1 ? '#f5f5f5' : 'white'
                                     }}
-                                    disabled={products?.total === products?.data?.length || products?.totalPage === 1}
-                                    onClick={() => setLimit((prev) => prev + 8)}
-                                />
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1 || isLoading}
+                                >
+                                    Trước
+                                </button>
+
+                                {Array.from({ length: products?.pagination?.totalPages || 1 }).map((_, index) => (
+                                    <button
+                                        key={index + 1}
+                                        style={{
+                                            padding: '8px 16px',
+                                            border: '1px solid #d9d9d9',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            backgroundColor: currentPage === index + 1 ? 'rgb(11, 116, 229)' : 'white',
+                                            color: currentPage === index + 1 ? 'white' : 'black'
+                                        }}
+                                        onClick={() => handlePageChange(index + 1)}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+
+                                <button
+                                    style={{
+                                        padding: '8px 16px',
+                                        border: '1px solid #d9d9d9',
+                                        borderRadius: '4px',
+                                        cursor: currentPage === (products?.pagination?.totalPages || 1) ? 'not-allowed' : 'pointer',
+                                        backgroundColor: currentPage === (products?.pagination?.totalPages || 1) ? '#f5f5f5' : 'white'
+                                    }}
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === (products?.pagination?.totalPages || 1) || isLoading}
+                                >
+                                    Sau
+                                </button>
                             </div>
                         </Col>
                     </Row>
