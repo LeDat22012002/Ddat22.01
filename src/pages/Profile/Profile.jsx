@@ -58,24 +58,69 @@ const ProfilePage = () => {
         setName(value);
     };
     const handleOnchangePhone = (value) => {
-        setPhone(value);
+        const phoneNumber = value.replace(/[^\d]/g, '');
+        setPhone(phoneNumber);
     };
     const handleOnchangeAddress = (value) => {
         setAddress(value);
     };
     const handleOnchangeAvatar = async ({ fileList }) => {
-        const file = fileList[0];
-        if (!file.url && !file.preview) {
-            file.preview = await getBase64(file.originFileObj);
+        if (fileList.length > 0) {
+            const file = fileList[0];
+            // Check if file is an image
+            if (!file.type || !file.type.startsWith('image/')) {
+                message.error('Chỉ được upload file ảnh');
+                return;
+            }
+            // Check file size (e.g., max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                message.error('Kích thước ảnh không được vượt quá 2MB');
+                return;
+            }
+            if (!file.url && !file.preview) {
+                file.preview = await getBase64(file.originFileObj);
+            }
+            setAvatar(file.preview);
         }
-        setAvatar(file.preview);
     };
 
     const handleUpdate = () => {
-        mutation.mutate({ id: user?.id, email, name, phone, address, avatar, access_token: user?.access_token });
+        // Validate email
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (email && !emailRegex.test(email)) {
+            message.error('Email không đúng định dạng');
+            return;
+        }
 
-        // console.log('update', email, name, phone, address, avatar);
+        // Validate phone number (10 digits)
+        if (phone && !/^\d{10}$/.test(phone)) {
+            message.error('Số điện thoại phải có 10 chữ số');
+            return;
+        }
+
+        // Validate name
+        if (name && name.length < 2) {
+            message.error('Tên phải có ít nhất 2 ký tự');
+            return;
+        }
+
+        // Validate address
+        if (address && address.length < 5) {
+            message.error('Địa chỉ phải có ít nhất 5 ký tự');
+            return;
+        }
+
+        mutation.mutate({ 
+            id: user?.id, 
+            email, 
+            name, 
+            phone, 
+            address, 
+            avatar, 
+            access_token: user?.access_token 
+        });
     };
+
     return (
         <div style={{ width: '1270px', margin: '0 auto', marginTop: '80px', marginBottom: '10px' }}>
             <WrapperHeader>Thông tin người dùng</WrapperHeader>
@@ -151,8 +196,13 @@ const ProfilePage = () => {
                     </WrapperInput>
                     <WrapperInput>
                         <WapperLabel htmlFor="avatar">Avatar</WapperLabel>
-                        <WrapperUploadFile WrapperUploadFile onChange={handleOnchangeAvatar} maxCount={1}>
-                            <Button icon={<UploadOutlined />}>select file</Button>
+                        <WrapperUploadFile 
+                            onChange={handleOnchangeAvatar} 
+                            maxCount={1}
+                            accept="image/*"
+                            beforeUpload={() => false} // Prevent auto upload
+                        >
+                            <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
                         </WrapperUploadFile>
                         {avatar && (
                             <img
@@ -161,12 +211,6 @@ const ProfilePage = () => {
                                 alt="avatar"
                             ></img>
                         )}
-                        {/* <InputForm
-                            style={{ width: '300px' }}
-                            id="avatar"
-                            value={avatar}
-                            onChange={handleOnchangeAvatar}
-                        ></InputForm> */}
                         <ButtonComponent
                             onClick={handleUpdate}
                             style={{

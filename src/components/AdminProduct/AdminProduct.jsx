@@ -1,6 +1,13 @@
-import { Button, Form, Select } from 'antd';
+import { Button, Form, Select, Typography, Row, Col, Space, Input, InputNumber, Upload } from 'antd';
 import { WrapperHeader } from './style';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    DeleteOutlined,
+    EditOutlined,
+    PlusOutlined,
+    ShopOutlined,
+    DollarOutlined,
+    InboxOutlined,
+} from '@ant-design/icons';
 import TableComponent from '../TableComponent/Table';
 import { useEffect, useState } from 'react';
 import InputComPonent from '../InputComponent/InputComponent';
@@ -18,8 +25,11 @@ import DrawerComponent from '../DrawComponent/DrawerComponent';
 import { useSelector } from 'react-redux';
 import ModalComponet from '../ModalComponent/ModalComponent';
 
+const { TextArea } = Input;
+
 const AdminProduct = () => {
     const { Option } = Select;
+    const [isEdit, setIsEdit] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [rowSelected, setRowSelected] = useState('');
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
@@ -31,7 +41,7 @@ const AdminProduct = () => {
         type: '',
         price: '',
         countInStock: '',
-        rating: '',
+
         description: '',
         image: '',
         newType: '',
@@ -124,6 +134,7 @@ const AdminProduct = () => {
     }, [rowSelected, isOpenDrawer]);
     // console.log('datngu', stateProductDetails);
     const handleDetailsProduct = () => {
+        setIsEdit(true);
         setIsOpenDrawer(true);
     };
     const handleDeleteManyProducts = (ids) => {
@@ -170,15 +181,11 @@ const AdminProduct = () => {
         isError: isErrorDeletedMany,
     } = mutationDeletedMany;
     // console.log('dataUpdated', dataUpdated);
-    const queryProduct = useQuery(
-        ['products', currentPage, limit],
-        getAllProducts,
-        {
-            retry: 3,
-            retryDelay: 1000,
-            keepPreviousData: true,
-        }
-    );
+    const queryProduct = useQuery(['products', currentPage, limit], getAllProducts, {
+        retry: 3,
+        retryDelay: 1000,
+        keepPreviousData: true,
+    });
     const queryCategory = useQuery(['categorys'], fetchAllCategoryProduct);
     const queryBrand = useQuery(['brands'], fetchAllBrandProduct);
     const queryTypeProduct = useQuery(['type-product'], fetchAllTypeProduct);
@@ -269,13 +276,13 @@ const AdminProduct = () => {
 
     useEffect(() => {
         if (isSuccess && data?.status === 'OK') {
-            message.success();
+            message.success('Thêm sản phẩm thành công');
             handleCancel();
             setCurrentPage(1);
-        } else if (isError) {
-            message.error();
+        } else if (isError || data?.status === 'ERR') {
+            message.error(data?.message || 'Có lỗi xảy ra');
         }
-    }, [isSuccess]);
+    }, [isSuccess, isError, data]);
 
     const handleOnchangeCategory = (value) => {
         setStateProduct({
@@ -294,21 +301,22 @@ const AdminProduct = () => {
 
     useEffect(() => {
         if (isSuccessDeletedMany && dataDeletedMany?.status === 'OK') {
-            message.success();
-        } else if (isErrorDeletedMany) {
-            message.error();
+            message.success('Xóa các sản phẩm thành công');
+        } else if (isErrorDeletedMany || dataDeletedMany?.status === 'ERR') {
+            message.error(dataDeletedMany?.message || 'Có lỗi xảy ra khi xóa sản phẩm');
         }
-    }, [isSuccessDeletedMany]);
+    }, [isSuccessDeletedMany, isErrorDeletedMany, dataDeletedMany]);
 
     useEffect(() => {
         if (isSuccessDeleted && dataDeleted?.status === 'OK') {
-            message.success();
+            message.success('Xóa sản phẩm thành công');
             handleCancelDelete();
             setCurrentPage(1);
-        } else if (isErrorDeleted) {
-            message.error();
+        } else if (isErrorDeleted || dataDeleted?.status === 'ERR') {
+            message.error(dataDeleted?.message || 'Có lỗi xảy ra khi xóa sản phẩm');
+            handleCancelDelete();
         }
-    }, [isSuccessDeleted]);
+    }, [isSuccessDeleted, isErrorDeleted, dataDeleted]);
     const handleCloseDrawer = () => {
         setIsOpenDrawer(false);
         setStateProductDetails({
@@ -328,13 +336,13 @@ const AdminProduct = () => {
 
     useEffect(() => {
         if (isSuccessUpdated && dataUpdated?.status === 'OK') {
-            message.success();
+            message.success('Cập nhật sản phẩm thành công');
             handleCloseDrawer();
             setCurrentPage(1);
-        } else if (isErrorUpdated) {
-            message.error();
+        } else if (isErrorUpdated || dataUpdated?.status === 'ERR') {
+            message.error(dataUpdated?.message || 'Có lỗi xảy ra khi cập nhật');
         }
-    }, [isSuccessUpdated]);
+    }, [isSuccessUpdated, isErrorUpdated, dataUpdated]);
 
     const handleCancelDelete = () => {
         setIsModalOpenDelete(false);
@@ -353,6 +361,7 @@ const AdminProduct = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
+        setIsEdit(false);
         setStateProduct({
             name: '',
             type: '',
@@ -491,22 +500,24 @@ const AdminProduct = () => {
                         };
                     }}
                 />
-                
+
                 {/* Thêm phân trang */}
-                <div style={{ 
-                    width: '100%', 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    marginTop: '20px',
-                    gap: '8px'
-                }}>
+                <div
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        marginTop: '20px',
+                        gap: '8px',
+                    }}
+                >
                     <button
                         style={{
                             padding: '8px 16px',
                             border: '1px solid #d9d9d9',
                             borderRadius: '4px',
                             cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                            backgroundColor: currentPage === 1 ? '#f5f5f5' : 'white'
+                            backgroundColor: currentPage === 1 ? '#f5f5f5' : 'white',
                         }}
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1 || isLoadingProducts}
@@ -523,7 +534,7 @@ const AdminProduct = () => {
                                 borderRadius: '4px',
                                 cursor: 'pointer',
                                 backgroundColor: currentPage === index + 1 ? 'rgb(11, 116, 229)' : 'white',
-                                color: currentPage === index + 1 ? 'white' : 'black'
+                                color: currentPage === index + 1 ? 'white' : 'black',
                             }}
                             onClick={() => handlePageChange(index + 1)}
                         >
@@ -537,7 +548,8 @@ const AdminProduct = () => {
                             border: '1px solid #d9d9d9',
                             borderRadius: '4px',
                             cursor: currentPage === (products?.pagination?.totalPages || 1) ? 'not-allowed' : 'pointer',
-                            backgroundColor: currentPage === (products?.pagination?.totalPages || 1) ? '#f5f5f5' : 'white'
+                            backgroundColor:
+                                currentPage === (products?.pagination?.totalPages || 1) ? '#f5f5f5' : 'white',
                         }}
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === (products?.pagination?.totalPages || 1) || isLoadingProducts}
@@ -546,445 +558,459 @@ const AdminProduct = () => {
                     </button>
                 </div>
             </div>
-            <ModalComponet forceRender title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
+            <ModalComponet
+                title={
+                    <Typography.Title level={4} style={{ margin: 0 }}>
+                        {isEdit ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới'}
+                    </Typography.Title>
+                }
+                open={isModalOpen}
+                onCancel={handleCancel}
+                footer={null}
+                width={800}
+                style={{
+                    top: 20,
+                    maxHeight: '90vh',
+                    overflow: 'auto',
+                }}
+            >
                 <Loading isLoading={isLoading}>
-                    <Form
-                        name="basic"
-                        labelCol={{
-                            span: 6,
-                        }}
-                        wrapperCol={{
-                            span: 18,
-                        }}
-                        style={{
-                            maxWidth: 600,
-                        }}
-                        onFinish={onFinish}
-                        autoComplete="on"
-                        form={form}
-                    >
-                        {/* name , image , type, price , countInStock , rating , description */}
-                        <Form.Item
-                            label="Tên sản phẩm"
-                            name="name"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập tên sản phẩm!',
-                                },
-                            ]}
-                        >
-                            <InputComPonent value={stateProduct.name} onChange={handleOnchange} name="name" />
-                        </Form.Item>
-                        <Form.Item
-                            label="Danh mục  "
-                            name="type"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập danh mục sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <Select
-                                name="type"
-                                value={stateProduct.type}
-                                onChange={handleOnchangeSelect}
-                                options={renderOptions(queryTypeProduct?.data?.data)}
-                            ></Select>
-                        </Form.Item>
+                    <Form form={form} onFinish={onFinish} layout="vertical" style={{ marginTop: '20px' }}>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Tên sản phẩm</span>}
+                                    name="name"
+                                    rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}
+                                >
+                                    <Input
+                                        prefix={<ShopOutlined />}
+                                        placeholder="Nhập tên sản phẩm"
+                                        style={{ borderRadius: '6px' }}
+                                        onChange={handleOnchange}
+                                        name="name"
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Dáng đàn</span>}
+                                    name="type"
+                                    rules={[{ required: true, message: 'Vui lòng chọn dáng đàn!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn dáng đàn"
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        onChange={handleOnchangeSelect}
+                                        options={[
+                                            ...renderOptions(queryTypeProduct?.data?.data),
+                                            {
+                                                value: 'add_type',
+                                                label: '+ Thêm dáng đàn mới',
+                                            },
+                                        ]}
+                                    />
+                                </Form.Item>
 
-                        {stateProduct.type === 'add_type' && (
-                            <Form.Item
-                                label="Danh mục mới "
-                                name="newType"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Vui lòng nhập danh mục sản phẩm ',
-                                    },
-                                ]}
-                            >
-                                <InputComPonent value={stateProduct.newType} onChange={handleOnchange} name="newType" />
-                            </Form.Item>
-                        )}
-                        <Form.Item
-                            label="Categry  "
-                            name="category"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập danh mục sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <Select
-                                name="category"
-                                value={stateProduct.category}
-                                onChange={handleOnchangeCategory}
+                                {stateProduct.type === 'add_type' && (
+                                    <Form.Item
+                                        label={<span style={{ fontWeight: 500 }}>Tên dáng đàn mới</span>}
+                                        name="newType"
+                                        rules={[{ required: true, message: 'Vui lòng nhập tên dáng đàn mới!' }]}
+                                    >
+                                        <Input
+                                            placeholder="Nhập tên dáng đàn mới"
+                                            style={{ borderRadius: '6px' }}
+                                            onChange={handleOnchange}
+                                            name="newType"
+                                        />
+                                    </Form.Item>
+                                )}
+                            </Col>
+                        </Row>
 
-                                // options={renderCategory(queryCategory?.data?.data?.name)}
-                            >
-                                {queryCategory?.data?.data?.map((dattt) => (
-                                    <Option key={dattt._id} value={dattt._id}>
-                                        {dattt.name}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item
-                            label="Brand"
-                            name="brand"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập thương hiệu sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <Select
-                                name="brand"
-                                value={stateProduct.brand}
-                                onChange={handleOnchangeBrand}
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Giá bán</span>}
+                                    name="price"
+                                    rules={[{ required: true, message: 'Vui lòng nhập giá!' }]}
+                                >
+                                    <InputNumber
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        prefix={<DollarOutlined />}
+                                        placeholder="Nhập giá"
+                                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                        parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                                        onChange={(value) => handleOnchange({ target: { name: 'price', value } })}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Số lượng</span>}
+                                    name="countInStock"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số lượng!' }]}
+                                >
+                                    <InputNumber
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        min={0}
+                                        placeholder="Nhập số lượng"
+                                        onChange={(value) =>
+                                            handleOnchange({ target: { name: 'countInStock', value } })
+                                        }
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                                // options={renderCategory(queryCategory?.data?.data?.name)}
-                            >
-                                {queryBrand?.data?.data?.map((brandd) => (
-                                    <Option key={brandd._id} value={brandd._id}>
-                                        {brandd.name}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Danh mục</span>}
+                                    name="category"
+                                    rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn danh mục"
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        onChange={handleOnchangeCategory}
+                                    >
+                                        {queryCategory?.data?.data?.map((cat) => (
+                                            <Select.Option key={cat._id} value={cat._id}>
+                                                {cat.name}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Thương hiệu</span>}
+                                    name="brand"
+                                    rules={[{ required: true, message: 'Vui lòng chọn thương hiệu!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn thương hiệu"
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        onChange={handleOnchangeBrand}
+                                    >
+                                        {queryBrand?.data?.data?.map((brand) => (
+                                            <Select.Option key={brand._id} value={brand._id}>
+                                                {brand.name}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
                         <Form.Item
-                            label=" Số lượng  "
-                            name="countInStock"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập số lượng sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent
-                                value={stateProduct.countInStock}
-                                onChange={handleOnchange}
-                                name="countInStock"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Giá sản phẩm "
-                            name="price"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập giá sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent value={stateProduct.price} onChange={handleOnchange} name="price" />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Số sao "
-                            name="rating"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập số sao của sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent value={stateProduct.rating} onChange={handleOnchange} name="rating" />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Mô tả sản phẩm  "
+                            label={<span style={{ fontWeight: 500 }}>Mô tả sản phẩm</span>}
                             name="description"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập mô tả của sản phẩm ',
-                                },
-                            ]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
                         >
-                            <InputComPonent
-                                value={stateProduct.description}
+                            <TextArea
+                                rows={4}
+                                placeholder="Nhập mô tả chi tiết về sản phẩm"
+                                style={{ borderRadius: '6px' }}
                                 onChange={handleOnchange}
                                 name="description"
                             />
                         </Form.Item>
+
                         <Form.Item
-                            label=" Giá giảm "
-                            name="discount"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập giảm giá của sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent value={stateProduct.discount} onChange={handleOnchange} name="discount" />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Ảnh sản phẩm  "
+                            label={<span style={{ fontWeight: 500 }}>Hình ảnh sản phẩm</span>}
                             name="image"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng chọn ảnh của sản phẩm ',
-                                },
-                            ]}
+                            rules={[{ required: true, message: 'Vui lòng chọn ảnh!' }]}
                         >
-                            <WrapperUploadFile WrapperUploadFile onChange={handleOnchangeAvatar} maxCount={1}>
-                                <Button>select file</Button>
-                                {stateProduct?.image && (
+                            <Upload.Dragger
+                                maxCount={1}
+                                beforeUpload={() => false}
+                                onChange={handleOnchangeAvatar}
+                                accept="image/*"
+                                style={{
+                                    borderRadius: '6px',
+                                    padding: '20px',
+                                }}
+                            >
+                                {stateProduct?.image ? (
                                     <img
-                                        src={stateProduct?.image}
+                                        src={stateProduct.image}
+                                        alt="product"
                                         style={{
-                                            height: '60px',
-                                            width: '60px',
-                                            borderRadius: '50%',
-                                            objectFit: 'cover',
-                                            marginLeft: '10px',
+                                            height: '100px',
+                                            width: 'auto',
+                                            objectFit: 'contain',
                                         }}
-                                        alt="ảnh sản phẩm"
-                                    ></img>
+                                    />
+                                ) : (
+                                    <>
+                                        <p className="ant-upload-drag-icon">
+                                            <InboxOutlined style={{ fontSize: '48px', color: '#40a9ff' }} />
+                                        </p>
+                                        <p className="ant-upload-text">Kéo thả hoặc click để tải ảnh lên</p>
+                                    </>
                                 )}
-                            </WrapperUploadFile>
+                            </Upload.Dragger>
                         </Form.Item>
-                        <Form.Item
-                            wrapperCol={{
-                                offset: 17,
-                                span: 16,
-                            }}
-                        >
-                            <Button type="primary" htmlType="submit">
-                                Thêm sản phẩm
-                            </Button>
+
+                        <Form.Item style={{ marginBottom: 0 }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'flex-end',
+                                    gap: '8px',
+                                    marginTop: '24px',
+                                    paddingTop: '16px',
+                                    borderTop: '1px solid #f0f0f0',
+                                }}
+                            >
+                                <Button onClick={handleCancel}>Hủy bỏ</Button>
+                                <Button type="primary" htmlType="submit" loading={isLoading}>
+                                    {isEdit ? 'Cập nhật' : 'Thêm mới'}
+                                </Button>
+                            </div>
                         </Form.Item>
                     </Form>
                 </Loading>
             </ModalComponet>
             <DrawerComponent
-                title="Chi tiết sản phẩm "
+                title={
+                    <Typography.Title level={4} style={{ margin: 0 }}>
+                        Chi tiết sản phẩm
+                    </Typography.Title>
+                }
                 isOpen={isOpenDrawer}
                 onClose={() => setIsOpenDrawer(false)}
-                width="90%"
+                width="50%"
             >
                 <Loading isLoading={isLoadingUpdate || isLoadingUpdated}>
                     <Form
                         name="basic"
-                        labelCol={{
-                            span: 4,
-                        }}
-                        wrapperCol={{
-                            span: 20,
-                        }}
-                        style={{
-                            maxWidth: 600,
-                        }}
+                        layout="vertical"
                         onFinish={onUpdateProduct}
                         autoComplete="on"
                         form={form}
+                        style={{ marginTop: '20px' }}
                     >
-                        {/* name , image , type, price , countInStock , rating , description */}
-                        <Form.Item
-                            label="Tên sản phẩm"
-                            name="name"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập tên sản phẩm!',
-                                },
-                            ]}
-                        >
-                            <InputComPonent
-                                value={stateProductDetails.name}
-                                onChange={handleOnchangeDetails}
-                                name="name"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Size "
-                            name="type"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập danh mục sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent
-                                value={stateProductDetails.type}
-                                onChange={handleOnchangeDetails}
-                                name="type"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label="Category "
-                            name="category"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập danh mục sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <Select
-                                name="category"
-                                value={stateProductDetails.category}
-                                onChange={handleOnchangeDetailsCategory}
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Tên sản phẩm</span>}
+                                    name="name"
+                                    rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}
+                                >
+                                    <Input
+                                        prefix={<ShopOutlined />}
+                                        placeholder="Nhập tên sản phẩm"
+                                        style={{ borderRadius: '6px' }}
+                                        value={stateProductDetails.name}
+                                        onChange={handleOnchangeDetails}
+                                        name="name"
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Dáng đàn</span>}
+                                    name="type"
+                                    rules={[{ required: true, message: 'Vui lòng chọn dáng đàn!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn dáng đàn"
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        value={stateProductDetails.type}
+                                        onChange={(value) => {
+                                            setStateProductDetails({
+                                                ...stateProductDetails,
+                                                type: value
+                                            });
+                                        }}
+                                        options={[
+                                            ...renderOptions(queryTypeProduct?.data?.data),
+                                            {
+                                                value: 'add_type',
+                                                label: '+ Thêm dáng đàn mới'
+                                            }
+                                        ]}
+                                    />
+                                </Form.Item>
 
-                                // options={renderCategory(queryCategory?.data?.data?.name)}
-                            >
-                                {queryCategory?.data?.data?.map((dattt) => (
-                                    <Option key={dattt._id} value={dattt._id}>
-                                        {dattt.name}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item
-                            label="Brand"
-                            name="brand"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập thương hiệu sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <Select
-                                name="brand"
-                                value={stateProductDetails.brand}
-                                onChange={handleOnchangeDetailsBrand}
+                                {stateProductDetails.type === 'add_type' && (
+                                    <Form.Item
+                                        label={<span style={{fontWeight: 500}}>Tên dáng đàn mới</span>}
+                                        name="newType"
+                                        rules={[{ required: true, message: 'Vui lòng nhập tên dáng đàn mới!' }]}
+                                    >
+                                        <Input
+                                            placeholder="Nhập tên dáng đàn mới"
+                                            style={{ borderRadius: '6px' }}
+                                            onChange={handleOnchangeDetails}
+                                            name="newType"
+                                        />
+                                    </Form.Item>
+                                )}
+                            </Col>
+                        </Row>
 
-                                // options={renderCategory(queryCategory?.data?.data?.name)}
-                            >
-                                {queryBrand?.data?.data?.map((brandd) => (
-                                    <Option key={brandd._id} value={brandd._id}>
-                                        {brandd.name}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Giá bán</span>}
+                                    name="price"
+                                    rules={[{ required: true, message: 'Vui lòng nhập giá!' }]}
+                                >
+                                    <InputNumber
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        prefix={<DollarOutlined />}
+                                        placeholder="Nhập giá"
+                                        formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                        parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                                        value={stateProductDetails.price}
+                                        onChange={(value) => handleOnchangeDetails({ target: { name: 'price', value } })}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Số lượng</span>}
+                                    name="countInStock"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số lượng!' }]}
+                                >
+                                    <InputNumber
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        min={0}
+                                        placeholder="Nhập số lượng"
+                                        value={stateProductDetails.countInStock}
+                                        onChange={(value) => handleOnchangeDetails({ target: { name: 'countInStock', value } })}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Danh mục</span>}
+                                    name="category"
+                                    rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn danh mục"
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        value={stateProductDetails.category}
+                                        onChange={handleOnchangeDetailsCategory}
+                                    >
+                                        {queryCategory?.data?.data?.map((cat) => (
+                                            <Select.Option key={cat._id} value={cat._id}>
+                                                {cat.name}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    label={<span style={{ fontWeight: 500 }}>Thương hiệu</span>}
+                                    name="brand"
+                                    rules={[{ required: true, message: 'Vui lòng chọn thương hiệu!' }]}
+                                >
+                                    <Select
+                                        showSearch
+                                        placeholder="Chọn thương hiệu"
+                                        style={{ width: '100%', borderRadius: '6px' }}
+                                        value={stateProductDetails.brand}
+                                        onChange={handleOnchangeDetailsBrand}
+                                    >
+                                        {queryBrand?.data?.data?.map((brand) => (
+                                            <Select.Option key={brand._id} value={brand._id}>
+                                                {brand.name}
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
                         <Form.Item
-                            label=" Số lượng  "
-                            name="countInStock"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập số lượng sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent
-                                value={stateProductDetails.countInStock}
-                                onChange={handleOnchangeDetails}
-                                name="countInStock"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Giá sản phẩm "
-                            name="price"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập giá sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent
-                                value={stateProductDetails.price}
-                                onChange={handleOnchangeDetails}
-                                name="price"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Số sao "
-                            name="rating"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập số sao của sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent
-                                value={stateProductDetails.rating}
-                                onChange={handleOnchangeDetails}
-                                name="rating"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Mô tả sản phẩm  "
+                            label={<span style={{ fontWeight: 500 }}>Mô tả sản phẩm</span>}
                             name="description"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập mô tả của sản phẩm ',
-                                },
-                            ]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
                         >
-                            <InputComPonent
+                            <TextArea
+                                rows={4}
+                                placeholder="Nhập mô tả chi tiết về sản phẩm"
+                                style={{ borderRadius: '6px' }}
                                 value={stateProductDetails.description}
                                 onChange={handleOnchangeDetails}
                                 name="description"
                             />
                         </Form.Item>
+
                         <Form.Item
-                            label=" Giảm giá "
-                            name="discount"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng nhập giảm giá của sản phẩm ',
-                                },
-                            ]}
-                        >
-                            <InputComPonent
-                                value={stateProductDetails.discount}
-                                onChange={handleOnchangeDetails}
-                                name="discount"
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            label=" Ảnh sản phẩm  "
+                            label={<span style={{ fontWeight: 500 }}>Hình ảnh sản phẩm</span>}
                             name="image"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Vui lòng chọn ảnh của sản phẩm ',
-                                },
-                            ]}
+                            rules={[{ required: true, message: 'Vui lòng chọn ảnh!' }]}
                         >
-                            <WrapperUploadFile WrapperUploadFile onChange={handleOnchangeAvatarDetails} maxCount={1}>
-                                <Button>select file</Button>
-                                {stateProductDetails?.image && (
+                            <Upload.Dragger
+                                maxCount={1}
+                                beforeUpload={() => false}
+                                onChange={handleOnchangeAvatarDetails}
+                                accept="image/*"
+                                style={{ 
+                                    borderRadius: '6px',
+                                    padding: '20px'
+                                }}
+                            >
+                                {stateProductDetails?.image ? (
                                     <img
-                                        src={stateProductDetails?.image}
+                                        src={stateProductDetails.image}
+                                        alt="product"
                                         style={{
-                                            height: '60px',
-                                            width: '60px',
-                                            borderRadius: '50%',
-                                            objectFit: 'cover',
-                                            marginLeft: '10px',
+                                            height: '100px',
+                                            width: 'auto',
+                                            objectFit: 'contain'
                                         }}
-                                        alt="ảnh sản phẩm"
-                                    ></img>
+                                    />
+                                ) : (
+                                    <>
+                                        <p className="ant-upload-drag-icon">
+                                            <InboxOutlined style={{fontSize: '48px', color: '#40a9ff'}} />
+                                        </p>
+                                        <p className="ant-upload-text">
+                                            Kéo thả hoặc click để tải ảnh lên
+                                        </p>
+                                    </>
                                 )}
-                            </WrapperUploadFile>
+                            </Upload.Dragger>
                         </Form.Item>
-                        <Form.Item
-                            wrapperCol={{
-                                offset: 20,
-                                span: 16,
-                            }}
-                        >
-                            <Button type="primary" htmlType="submit">
-                                Update
-                            </Button>
+
+                        <Form.Item style={{ marginBottom: 0 }}>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: '8px',
+                                marginTop: '24px',
+                                paddingTop: '16px',
+                                borderTop: '1px solid #f0f0f0'
+                            }}>
+                                <Button onClick={() => setIsOpenDrawer(false)}>
+                                    Hủy bỏ
+                                </Button>
+                                <Button 
+                                    type="primary" 
+                                    htmlType="submit" 
+                                    loading={isLoadingUpdate || isLoadingUpdated}
+                                >
+                                    Cập nhật
+                                </Button>
+                            </div>
                         </Form.Item>
                     </Form>
                 </Loading>

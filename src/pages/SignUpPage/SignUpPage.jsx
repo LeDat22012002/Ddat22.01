@@ -35,17 +35,33 @@ const SignUpPage = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const handleOnchangeEmail = (value) => {
-        setEmail(value);
+        setEmail(value.trim());
     };
     const handleOnchangePassword = (value) => {
-        setPassword(value);
+        setPassword(value.replace(/\s/g, ''));
     };
     const handleOnchangeConfirmPassword = (value) => {
-        setConfirmPassword(value);
+        setConfirmPassword(value.replace(/\s/g, ''));
     };
     const handleSignUp = () => {
+        if (!email || !password || !confirmPassword) {
+            message.error('Vui lòng nhập đầy đủ thông tin');
+            return;
+        }
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (!emailRegex.test(email)) {
+            message.error('Email không đúng định dạng');
+            return;
+        }
+        if (password.length < 6) {
+            message.error('Mật khẩu phải có ít nhất 6 ký tự');
+            return;
+        }
+        if (password !== confirmPassword) {
+            message.error('Mật khẩu nhập lại không khớp');
+            return;
+        }
         mutation.mutate({ email, password, confirmPassword });
-        // console.log('value', email, password, confirmPassword);
     };
     const handleCloseLogin = () => {
         navigate('/');
@@ -83,9 +99,15 @@ const SignUpPage = () => {
                     <div style={{ position: 'relative' }}>
                         <span
                             onClick={() => setIsShowPassword(!isShowPassword)}
-                            style={{ zIndex: '10', position: 'absolute', top: '4px', right: '8px' }}
+                            style={{ 
+                                zIndex: '10', 
+                                position: 'absolute', 
+                                top: '4px', 
+                                right: '8px',
+                                cursor: 'pointer' 
+                            }}
                         >
-                            {/* {isShowPassword ? <EyeFilled /> : <EyeInvisibleFilled />} */}
+                            {isShowPassword ? <EyeFilled /> : <EyeInvisibleFilled />}
                         </span>
                         <InputForm
                             style={{ marginBottom: '10px' }}
@@ -98,9 +120,15 @@ const SignUpPage = () => {
                     <div style={{ position: 'relative' }}>
                         <span
                             onClick={() => setIsShowConfirmPassword(!isShowConfirmPassword)}
-                            style={{ zIndex: '10', position: 'absolute', top: '4px', right: '8px' }}
+                            style={{ 
+                                zIndex: '10', 
+                                position: 'absolute', 
+                                top: '4px', 
+                                right: '8px',
+                                cursor: 'pointer' 
+                            }}
                         >
-                            {/* {isShowConfirmPassword ? <EyeFilled /> : <EyeInvisibleFilled />} */}
+                            {isShowConfirmPassword ? <EyeFilled /> : <EyeInvisibleFilled />}
                         </span>
                         <InputForm
                             placeholder="Nhập lại password của bạn.."
@@ -112,7 +140,6 @@ const SignUpPage = () => {
                     {data?.status === 'ERR' && <span style={{ color: 'red' }}>{data?.message}</span>}
                     <Loading isLoading={isLoading}>
                         <ButtonComponent
-                            disabled={!email.length || !password.length || !confirmPassword.length}
                             onClick={handleSignUp}
                             style={{
                                 backgroundColor: 'rgb(255,57,69)',

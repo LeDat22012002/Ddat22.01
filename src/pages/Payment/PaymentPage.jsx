@@ -1,4 +1,11 @@
-import { Form, Radio } from 'antd';
+import { 
+    Checkbox, 
+    Form, 
+    Input,
+    Row,
+    Col,
+    Radio
+} from 'antd';
 import { WrapperInfo, WrapperLeft, WrapperRadio, WrapperRight, WrapperTotal } from './style';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -94,31 +101,64 @@ const PaymentPage = () => {
 
     // console.log('listChecked', listChecked);
 
+    const validateDeliveryInfo = () => {
+        if (!deliveryInfo.fullName?.trim()) {
+            message.error('Vui lòng nhập họ tên người nhận');
+            return false;
+        }
+        if (!deliveryInfo.phone?.trim()) {
+            message.error('Vui lòng nhập số điện thoại');
+            return false;
+        }
+        if (!deliveryInfo.email?.trim()) {
+            message.error('Vui lòng nhập email');
+            return false;
+        }
+        if (!deliveryInfo.address?.trim()) {
+            message.error('Vui lòng nhập địa chỉ');
+            return false;
+        }
+        if (!deliveryInfo.city?.trim()) {
+            message.error('Vui lòng nhập thành phố');
+            return false;
+        }
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(deliveryInfo.email)) {
+            message.error('Email không hợp lệ');
+            return false;
+        }
+        
+        // Validate phone number (Vietnam format)
+        const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+        if (!phoneRegex.test(deliveryInfo.phone)) {
+            message.error('Số điện thoại không hợp lệ');
+            return false;
+        }
+
+        return true;
+    };
+
     const handleAddOrder = () => {
-        if (
-            user?.access_token &&
-            order?.orderItemsSelected &&
-            user?.name &&
-            user?.address &&
-            user?.phone &&
-            user?.city &&
-            priceMemo &&
-            user?.id
-        ) {
-            // eslint-disable-next-line no-unused-expressions
+        if (!validateDeliveryInfo()) {
+            return;
+        }
+
+        if (user?.access_token && order?.orderItemsSelected && priceMemo && user?.id) {
             mutationAddOrder.mutate({
                 token: user?.access_token,
                 orderItems: order?.orderItemsSelected,
-                fullName: user?.name,
-                address: user?.address,
-                phone: user?.phone,
-                city: user?.city,
+                fullName: deliveryInfo.fullName,
+                address: deliveryInfo.address,
+                phone: deliveryInfo.phone,
+                city: deliveryInfo.city,
                 paymentMethod: payment,
                 itemsPrice: priceMemo,
                 shippingPrice: diliveryPriceMemo,
                 totalPrice: totalPriceMeno,
                 user: user?.id,
-                email: user?.email,
+                email: deliveryInfo.email,
             });
         }
     };
@@ -200,20 +240,23 @@ const PaymentPage = () => {
         setDelivery(e.target.value);
     };
     const onSuccessPaypal = (details, data) => {
-        // console.log('details, data', details, data);
+        if (!validateDeliveryInfo()) {
+            return;
+        }
+
         mutationAddOrder.mutate({
             token: user?.access_token,
             orderItems: order?.orderItemsSelected,
-            fullName: user?.name,
-            address: user?.address,
-            phone: user?.phone,
-            city: user?.city,
+            fullName: deliveryInfo.fullName,
+            address: deliveryInfo.address,
+            phone: deliveryInfo.phone,
+            city: deliveryInfo.city,
             paymentMethod: payment,
             itemsPrice: priceMemo,
             shippingPrice: diliveryPriceMemo,
             totalPrice: totalPriceMeno,
             user: user?.id,
-            email: user?.email,
+            email: deliveryInfo.email,
             isPaid: true,
             paidAt: details.update_time,
         });
@@ -244,6 +287,47 @@ const PaymentPage = () => {
         }
     }, []);
 
+    const [deliveryInfo, setDeliveryInfo] = useState({
+        fullName: user?.name || '',
+        phone: user?.phone || '',
+        address: user?.address || '',
+        city: user?.city || '',
+        email: user?.email || ''
+    });
+
+    const [useUserInfo, setUseUserInfo] = useState(true); // Toggle sử dụng thông tin user
+
+    const handleChangeDeliveryInfo = (e) => {
+        setDeliveryInfo({
+            ...deliveryInfo,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const [inputType, setInputType] = useState('account'); // 'account' hoặc 'manual'
+
+    const handleToggleUserInfo = (value) => {
+        setInputType(value);
+        if (value === 'account') {
+            setDeliveryInfo({
+                fullName: user?.name || '',
+                phone: user?.phone || '',
+                address: user?.address || '',
+                city: user?.city || '',
+                email: user?.email || ''
+            });
+        } else {
+            // Xóa form khi chuyển sang chế độ tự nhập
+            setDeliveryInfo({
+                fullName: '',
+                phone: '',
+                address: '',
+                city: '',
+                email: ''
+            });
+        }
+    };
+
     return (
         <div style={{ background: '#f5f5fa', width: '100%', height: '100vh', marginTop: '60px' }}>
             <Loading isLoading={isLoadingAddOrder}>
@@ -252,50 +336,158 @@ const PaymentPage = () => {
                         style={{
                             marginTop: '1px',
                             paddingTop: '20px',
-                            fontSize: '15px',
+                            fontSize: '20px',
                             fontWeight: '500',
                             cursor: 'pointer',
                         }}
                     >
                         Thanh toán
                     </h3>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
                         <WrapperLeft>
                             <WrapperInfo>
-                                <div>
-                                    <label style={{ fontSize: '20px', fontWeight: '500' }}>
-                                        Chọn phương thức giao hàng
-                                    </label>
-                                    <WrapperRadio onChange={handleDilivery} value={delivery}>
-                                        <Radio
+                                <div style={{ padding: '10px 20px' }}>
+                                    <span style={{ fontSize: '16px', fontWeight: '500' }}>Sản phẩm đã chọn</span>
+                                    {order?.orderItemsSelected?.map((item) => (
+                                        <div
+                                            key={item?.product}
                                             style={{
-                                                backgroundColor: 'rgb(240, 248, 255)',
-                                                padding: '20px',
-                                                borderRadius: '4px',
-                                                fontSize: '15px',
-                                                fontWeight: '500',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '15px',
+                                                margin: '15px 0',
+                                                borderBottom: '1px solid #f5f5f5',
+                                                paddingBottom: '15px',
                                             }}
-                                            value="fast"
                                         >
-                                            <span style={{ color: '#ea8500', fontWeight: 'bold', fontSize: '15px' }}>
-                                                FAST
-                                            </span>
-                                            Giao hàng tiết kiệm
-                                        </Radio>
-                                        <Radio
-                                            style={{
-                                                backgroundColor: 'rgb(240, 248, 255)',
-                                                padding: '20px',
-                                                borderRadius: '4px',
-                                                fontSize: '15px',
-                                                fontWeight: '500',
-                                            }}
-                                            value="gojek"
+                                            <img
+                                                src={item?.image}
+                                                style={{
+                                                    width: '70px',
+                                                    height: '70px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '6px',
+                                                }}
+                                                alt="product"
+                                            />
+                                            <div style={{ flex: 1 }}>
+                                                <div
+                                                    style={{
+                                                        fontSize: '14px',
+                                                        fontWeight: '500',
+                                                        marginBottom: '5px',
+                                                    }}
+                                                >
+                                                    {item?.name}
+                                                </div>
+                                                <div style={{ fontSize: '13px', color: '#666' }}>
+                                                    Số lượng: {item?.amount}
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        fontSize: '14px',
+                                                        color: 'rgb(255, 66, 78)',
+                                                        fontWeight: '500',
+                                                    }}
+                                                >
+                                                    {convertPrice(item?.price)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </WrapperInfo>
+                            <WrapperInfo>
+                                <div style={{ padding: '10px 20px' }}>
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'space-between',
+                                        marginBottom: '15px'
+                                    }}>
+                                        <span style={{ fontSize: '16px', fontWeight: '500' }}>
+                                            Thông tin người nhận
+                                        </span>
+                                        <Radio.Group 
+                                            value={inputType} 
+                                            onChange={(e) => handleToggleUserInfo(e.target.value)}
                                         >
-                                            <span style={{ color: '#ea8500', fontWeight: 'bold' }}>GO_JEK</span>
-                                            Giao hàng tiết kiệm
-                                        </Radio>
-                                    </WrapperRadio>
+                                            <Radio value="account">Dùng thông tin tài khoản</Radio>
+                                            <Radio value="manual">Tự nhập thông tin</Radio>
+                                        </Radio.Group>
+                                    </div>
+
+                                    <Form layout="vertical">
+                                        <Row gutter={16}>
+                                            <Col span={12}>
+                                                <Form.Item
+                                                    label="Họ tên người nhận"
+                                                    required
+                                                >
+                                                    <Input
+                                                        name="fullName"
+                                                        value={deliveryInfo.fullName}
+                                                        onChange={handleChangeDeliveryInfo}
+                                                        placeholder="Nhập họ tên"
+                                                        disabled={inputType === 'account'}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={12}>
+                                                <Form.Item
+                                                    label="Số điện thoại"
+                                                    required
+                                                >
+                                                    <Input
+                                                        name="phone"
+                                                        value={deliveryInfo.phone}
+                                                        onChange={handleChangeDeliveryInfo}
+                                                        placeholder="Nhập số điện thoại"
+                                                        disabled={inputType === 'account'}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+
+                                        <Form.Item
+                                            label="Email"
+                                            required
+                                        >
+                                            <Input
+                                                name="email"
+                                                value={deliveryInfo.email}
+                                                onChange={handleChangeDeliveryInfo}
+                                                placeholder="Nhập email"
+                                                disabled={inputType === 'account'}
+                                            />
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            label="Địa chỉ"
+                                            required
+                                        >
+                                            <Input
+                                                name="address"
+                                                value={deliveryInfo.address}
+                                                onChange={handleChangeDeliveryInfo}
+                                                placeholder="Nhập địa chỉ"
+                                                disabled={inputType === 'account'}
+                                            />
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            label="Thành phố"
+                                            required
+                                        >
+                                            <Input
+                                                name="city"
+                                                value={deliveryInfo.city}
+                                                onChange={handleChangeDeliveryInfo}
+                                                placeholder="Nhập thành phố"
+                                                disabled={inputType === 'account'}
+                                            />
+                                        </Form.Item>
+                                    </Form>
                                 </div>
                             </WrapperInfo>
                             <WrapperInfo>
@@ -535,7 +727,7 @@ const PaymentPage = () => {
                                 rules={[
                                     {
                                         required: true,
-                                        message: 'Vui lòng nhập Address',
+                                        message: 'Vui lng nhập Address',
                                     },
                                 ]}
                             >

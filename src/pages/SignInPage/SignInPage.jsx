@@ -14,6 +14,7 @@ import Loading from '../../components/LoadingComponent/Loading';
 import { jwtDecode } from 'jwt-decode';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../../redux/slides/userSlide';
+import { message } from 'antd';
 
 const SignInPage = () => {
     const [isShowPassword, setIsShowPassword] = useState(false);
@@ -55,17 +56,35 @@ const SignInPage = () => {
     };
 
     const handleOnchangeEmail = (value) => {
-        setEmail(value);
+        setEmail(value.trim());
     };
     const handleOnchangePassword = (value) => {
-        setPassword(value);
+        setPassword(value.replace(/\s/g, ''));
     };
     const handleSignIn = () => {
+        // Check for empty fields
+        if (!email || !password) {
+            message.error('Vui lòng nhập đầy đủ thông tin');
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (!emailRegex.test(email)) {
+            message.error('Email không đúng định dạng');
+            return;
+        }
+
+        // Check password length
+        if (password.length < 6) {
+            message.error('Mật khẩu phải có ít nhất 6 ký tự');
+            return;
+        }
+
         mutation.mutate({
             email,
             password,
         });
-        // console.log(email, password);
     };
     const handleCloseLogin = () => {
         navigate('/');
@@ -104,9 +123,15 @@ const SignInPage = () => {
                     <div style={{ position: 'relative' }}>
                         <span
                             onClick={() => setIsShowPassword(!isShowPassword)}
-                            style={{ zIndex: '10', position: 'absolute', top: '4px', right: '8px' }}
+                            style={{ 
+                                zIndex: '10', 
+                                position: 'absolute', 
+                                top: '4px', 
+                                right: '8px',
+                                cursor: 'pointer' 
+                            }}
                         >
-                            {/* {isShowPassword ? <EyeFilled /> : <EyeInvisibleFilled />} */}
+                            {isShowPassword ? <EyeFilled /> : <EyeInvisibleFilled />}
                         </span>
                         <InputForm
                             value={password}
@@ -118,7 +143,6 @@ const SignInPage = () => {
                     {data?.status === 'ERR' && <span style={{ color: 'red' }}>{data?.message}</span>}
                     <Loading isLoading={isLoading}>
                         <ButtonComponent
-                            disabled={!email.length || !password.length}
                             onClick={handleSignIn}
                             style={{
                                 backgroundColor: 'rgb(255,57,69)',

@@ -37,7 +37,7 @@ const OrderSuccessPage = () => {
                     </h3>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <WrapperContainer>
-                            <WrapperInfo>
+                            {/* <WrapperInfo>
                                 <div>
                                     <label style={{ fontSize: '18px', fontWeight: '500' }}>Phương thức giao hàng</label>
 
@@ -48,7 +48,7 @@ const OrderSuccessPage = () => {
                                         Giao hàng tiết kiệm
                                     </WrapperValue>
                                 </div>
-                            </WrapperInfo>
+                            </WrapperInfo> */}
                             <WrapperInfo>
                                 <div>
                                     <label style={{ fontSize: '18px', fontWeight: '500' }}>
